@@ -1,16 +1,16 @@
-# OpenCV CMake Template
+# Kinara Daryaft
 
-Shrimple CMake config to compile C++ OpenCV projects. Assumes a two-directory `src/` & `include/` structure.
+Despicable implementation of a Canny Edge Detector in CPP.
 
 ## Usage
 
 ```bash
-git clone https://github.com/<username>/<project-name>.git
-cd <project-name>
+git clone https://github.com/masroof-maindak/kinara-daryaft.git
+cd kinara-daryaft
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release .. # Or 'Debug' if you want to hack away.
 cmake --build .
-./demo # args, if relevant
+./knr -i <input-image> -o <output-dir># args, if relevant
 ```
 
 ## Dependencies
@@ -26,6 +26,6 @@ cmake --build .
 sudo pacman -S opencv qt6-base vtk hdf5
 ```
 
-<!-- ## Acknowledgements -->
-<!---->
-<!-- -  -->
+## Acknowledgements
+
+- Mubarak Shah's book
