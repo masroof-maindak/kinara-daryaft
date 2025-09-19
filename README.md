@@ -1,6 +1,6 @@
 # Kinara Daryaft
 
-Despicable implementation of a Canny Edge Detector in CPP.
+Despicable implementation of a Canny Edge Detector in C++.
 
 ## Usage
 
@@ -28,4 +28,5 @@ sudo pacman -S opencv qt6-base vtk hdf5
 
 ## Acknowledgements
 
-- Mubarak Shah's book
+- Fundamentals of Computer Vision - Mubarak Shah
+- [ArgParse](https://github.com/p-ranav/argparse)
