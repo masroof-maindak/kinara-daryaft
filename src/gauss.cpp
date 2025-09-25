@@ -96,25 +96,23 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
     // TODO: check if fogd is larger than image.
 
     const int half_size{fogd.rows / 2};
-    const cv::Mat img_padded{pad_image(img, half_size)};
-    cv::Mat f{};
-    f.create(img.size(), img.type());
+
+    cv::Mat f_part{};
+    f_part.create(img.size(), CV_8UC1);
 
     std::vector<uint8_t> patch{};
     patch.reserve(fogd.rows * fogd.cols);
 
     std::vector<std::int16_t> fogd_flat{fogd.data, fogd.data + (fogd.rows * fogd.cols)};
 
-    for (int y = half_size; y < img_padded.rows - half_size; y++) {
+    for (int y = half_size; y < img.rows - half_size; y++) {
 
-        std::uint8_t *f_row = f.ptr<std::uint8_t>(y);
+        std::uint8_t *f_row = f_part.ptr<std::uint8_t>(y);
 
-        for (int x = half_size; x < img_padded.cols - half_size; x++) {
-
-            // Convolution patch
+        for (int x = half_size; x < img.cols - half_size; x++) {
             for (int yy = y - half_size; yy <= y + half_size; yy++) {
 
-                const std::uint8_t *padded_row = img_padded.ptr<std::uint8_t>(yy);
+                const std::uint8_t *padded_row = img.ptr<std::uint8_t>(yy);
 
                 for (int xx = x - half_size; xx <= x + half_size; xx++)
                     patch.emplace_back(padded_row[xx]);
@@ -126,7 +124,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
         }
     }
 
-    return f;
+    return f_part;
 }
 
 cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
