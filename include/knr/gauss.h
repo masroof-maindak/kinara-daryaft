@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <expected>
 #include <utility>
 
 int compute_filter_size(float sigma, float T);
@@ -19,7 +20,7 @@ std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, c
 // Convolves a first-order Gaussian derivative (Gx or Gy) through a source image
 // img is 8UC1 (grayscale)
 // fogd is 16SC1 (16 bit signed int)
-cv::Mat convolve_through_image(const cv::Mat &img, const cv::Mat &fogd);
+std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, const cv::Mat &fogd);
 
 cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy);
 

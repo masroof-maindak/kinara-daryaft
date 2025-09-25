@@ -86,7 +86,15 @@ std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, c
     return {gx_i16, gy_i16};
 }
 
-cv::Mat convolve_through_image(const cv::Mat &img, const cv::Mat &fogd) {
+std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, const cv::Mat &fogd) {
+    if (img.type() != CV_8UC1)
+        return std::unexpected("Unexpected image type; require CV_8UC1 (grayscale).");
+
+    if (fogd.type() != CV_16SC1)
+        return std::unexpected("Unexpected partial derivative type; require CV_16SC1.");
+
+    // TODO: check if fogd is larger than image.
+
     const int half_size{fogd.rows / 2};
     const cv::Mat img_padded{pad_image(img, half_size)};
     cv::Mat f{};
