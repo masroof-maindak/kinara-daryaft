@@ -1,5 +1,4 @@
 #include <knr/gauss.h>
-#include <knr/utils.h>
 
 #include <math.h>
 #include <numeric>
@@ -12,6 +11,8 @@ int compute_filter_size(float sigma, float T) {
 }
 
 std::pair<cv::Mat, float> generate_gaussian_filter(const int filter_size, const float sigma) {
+    // TODO: check if sigma is in bounds
+    // TODO: check if filter size is positive and odd
     cv::Mat filt{};
     filt.create(filter_size, filter_size, CV_32FC1);
 
@@ -37,6 +38,9 @@ std::pair<cv::Mat, float> generate_gaussian_filter(const int filter_size, const 
 }
 
 std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, const float sigma) {
+    // TODO: validate filt_f's type
+    // TODO: validate sigma's bounds
+
     cv::Mat gx_f{};
     cv::Mat gy_f{};
     gx_f.create(filt_f.size(), CV_32FC1);
@@ -66,8 +70,6 @@ std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, c
     cv::Mat gy_i16{};
     gx_i16.create(filt_f.size(), CV_16SC1);
     gy_i16.create(filt_f.size(), CV_16SC1);
-
-    std::cout << gx_f << "\n\n" << gy_f << "\n\n";
 
     const float scale_factor{256};
 
