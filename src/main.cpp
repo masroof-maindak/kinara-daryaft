@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <print>
+#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
     auto args_expected = parse_args(argc, argv);
@@ -25,11 +26,14 @@ int main(int argc, char *argv[]) {
 
     const auto [filt, scale_factor] = generate_gaussian_filter(filt_size, args.sigma);
 
-    const auto [gx, gy] = compute_partial_derivatives(filt);
+    const auto [gx, gy] = compute_partial_derivatives(filt, args.sigma);
+
+    return EXIT_SUCCESS;
 
     const auto fx = convolve_through_image(img, gx);
-
     const auto fy = convolve_through_image(img, gy);
 
-    return 0;
+    // TODO: gradient direction/magnitude
+
+    return EXIT_SUCCESS;
 }
