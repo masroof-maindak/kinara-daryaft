@@ -8,6 +8,7 @@
 
 struct ArgConfig {
     float sigma;
+    float T;
     int low_threshold;
     int high_threshold;
     std::string img_path;
