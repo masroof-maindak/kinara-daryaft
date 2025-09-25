@@ -1,6 +1,9 @@
 #include <knr/gauss.h>
+#include <knr/utils.h>
 
 #include <math.h>
+#include <numeric>
+#include <print>
 #include <stdint.h>
 
 int compute_filter_size(float sigma, float T) {
@@ -83,13 +86,47 @@ std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, c
     return {gx_i16, gy_i16};
 }
 
-std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &gaussian_filt) {
-    cv::Mat gx{};
-    cv::Mat gy{};
-    gx.create(gaussian_filt.size(), CV_8UC1);
-    gy.create(gaussian_filt.size(), CV_8UC1);
+cv::Mat convolve_through_image(const cv::Mat &img, const cv::Mat &fogd) {
+    const int half_size{fogd.rows / 2};
+    const cv::Mat img_padded{pad_image(img, half_size)};
+    cv::Mat f{};
+    f.create(img.size(), img.type());
 
-    // TODO: derivatives?
+    std::vector<uint8_t> patch{};
+    patch.reserve(fogd.rows * fogd.cols);
 
-    return {gx, gy};
+    std::vector<std::int16_t> fogd_flat{fogd.data, fogd.data + (fogd.rows * fogd.cols)};
+
+    for (int y = half_size; y < img_padded.rows - half_size; y++) {
+
+        std::uint8_t *f_row = f.ptr<std::uint8_t>(y);
+
+        for (int x = half_size; x < img_padded.cols - half_size; x++) {
+
+            // Convolution patch
+            for (int yy = y - half_size; yy <= y + half_size; yy++) {
+
+                const std::uint8_t *padded_row = img_padded.ptr<std::uint8_t>(yy);
+
+                for (int xx = x - half_size; xx <= x + half_size; xx++)
+                    patch.emplace_back(padded_row[xx]);
+            }
+
+            const int dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
+            f_row[x] = dot_prod;
+            patch.clear();
+        }
+    }
+
+    return f;
+}
+
+cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
+    cv::Mat dir{};
+    return dir;
+}
+
+cv::Mat compute_gradient_magnitude(const cv::Mat &fx, const cv::Mat &fy) {
+    cv::Mat mag{};
+    return mag;
 }
