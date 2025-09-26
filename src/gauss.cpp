@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include <numeric>
-#include <print>
 #include <stdint.h>
 
 int compute_filter_size(float sigma, float T) {
@@ -108,7 +107,8 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
     std::vector<uint8_t> patch{};
     patch.reserve(fogd.rows * fogd.cols);
 
-    std::vector<std::int16_t> fogd_flat{fogd.data, fogd.data + (fogd.rows * fogd.cols)};
+    std::span<std::int16_t> fogd_flat{reinterpret_cast<std::int16_t *>(fogd.data),
+                                      reinterpret_cast<std::int16_t *>(fogd.data + fogd.elemSize() * fogd.total())};
 
     for (int y = half_size; y < img.rows - half_size; y++) {
 
@@ -124,6 +124,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
             }
 
             const int dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
+            // CHECK: Narrowing conversion. Take max?
             f_row[x] = dot_prod;
             patch.clear();
         }
