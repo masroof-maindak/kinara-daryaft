@@ -10,9 +10,10 @@ int compute_filter_size(float sigma, float T) {
     return 2 * half_size + 1;
 }
 
-std::pair<cv::Mat, float> generate_gaussian_filter(const int filter_size, const float sigma) {
+std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_size, const float sigma) {
     // TODO: check if sigma is in bounds
     // TODO: check if filter size is positive and odd
+
     cv::Mat filt{};
     filt.create(filter_size, filter_size, CV_32FC1);
 
@@ -32,12 +33,14 @@ std::pair<cv::Mat, float> generate_gaussian_filter(const int filter_size, const 
         }
     }
 
+    // Normalize
     filt /= sum;
 
-    return {filt, sum};
+    return filt;
 }
 
-std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, const float sigma) {
+std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivatives(const cv::Mat &filt_f,
+                                                                                    const float sigma) {
     // TODO: validate filt_f's type
     // TODO: validate sigma's bounds
 
@@ -85,7 +88,7 @@ std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, c
         }
     }
 
-    return {gx_i16, gy_i16};
+    return std::pair{gx_i16, gy_i16};
 }
 
 std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, const cv::Mat &fogd) {

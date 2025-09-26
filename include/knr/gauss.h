@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <expected>
+#include <string>
 #include <utility>
 
 int compute_filter_size(float sigma, float T);
@@ -11,11 +12,12 @@ int compute_filter_size(float sigma, float T);
 // Generates a normalized gaussian filter of floats
 // Also returns the scale factor so the user can 'scale down' later i.e during magnitude calculation.
 // G (x, y) = exp (-(x^2 + y^2)/(2*sigma^2))
-std::pair<cv::Mat, float> generate_gaussian_filter(const int filter_size, const float sigma);
+std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_size, const float sigma);
 
 // Computes Gx and Gy given a matrix of floats representing a Gaussian filter
 // Gx and Gy hold 16 bit integers
-std::pair<cv::Mat, cv::Mat> compute_partial_derivatives(const cv::Mat &filt_f, const float sigma);
+std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivatives(const cv::Mat &filt_f,
+                                                                                    const float sigma);
 
 // Convolves a first-order Gaussian derivative (Gx or Gy) through a (padded!) source image
 // img is 8UC1 (grayscale)

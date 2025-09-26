@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     }
     ArgConfig args{args_expected.value()};
 
-    std::string img_name = std::filesystem::path{args.img_path}.stem();
+    std::string img_name{std::filesystem::path{args.img_path}.stem()};
 
     auto img_expected = load_image(args.img_path);
     if (!img_expected.has_value()) {
@@ -28,9 +28,19 @@ int main(int argc, char *argv[]) {
 
     const int filt_size{compute_filter_size(args.sigma, args.T)};
 
-    const auto [filt, scale_factor]{generate_gaussian_filter(filt_size, args.sigma)};
+    const auto gaussian_filt_expected{generate_gaussian_filter(filt_size, args.sigma)};
+    if (!gaussian_filt_expected.has_value()) {
+        std::println(stderr, "Failed to generate gaussian filter: {}", gaussian_filt_expected.error());
+        return EXIT_FAILURE;
+    }
+    const auto filt{gaussian_filt_expected.value()};
 
-    const auto [gx, gy]{compute_partial_derivatives(filt, args.sigma)};
+    auto part_der_result_expected{compute_partial_derivatives(filt, args.sigma)};
+    if (!part_der_result_expected.has_value()) {
+        std::println(stderr, "Failed to partial derivatives of Gaussian: {}", part_der_result_expected.error());
+        return EXIT_FAILURE;
+    }
+    const auto [gx, gy]{part_der_result_expected.value()};
 
     const cv::Mat img_padded{pad_image(img, gx.rows)};
 
