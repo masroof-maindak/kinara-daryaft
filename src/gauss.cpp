@@ -155,17 +155,42 @@ cv::Mat compute_gradient_magnitude(const cv::Mat &fx, const cv::Mat &fy) {
     // TODO: ensure fx and fy are type CV_8UC1
 
     cv::Mat mag{};
+    cv::Mat temp{};
+    temp.create(fx.size(), CV_32FC1);
     mag.create(fx.size(), CV_8UC1);
 
     const int rows{fx.rows};
     const int cols{fx.cols};
     const float scale_factor{256};
 
-    for (int i = 0; i < rows * cols; i++)
-        mag.data[i] = static_cast<int>(std::round(sqrt(pow(fx.data[i], 2) + pow(fy.data[i], 2) / scale_factor)));
+    // Determine Magnitude
+    for (int y = 0; y < rows; y++) {
 
-    // TODO: normalize b/w 0 and 100
-    // TODO: normalize patch-by-patch instead (to make result lighting invariant)
+        const auto fx_row = fx.ptr<std::uint8_t>(y);
+        const auto fy_row = fy.ptr<std::uint8_t>(y);
+        auto temp_row     = temp.ptr<float>(y);
+
+        for (int x = 0; x < cols; x++)
+            temp_row[x] = sqrt(pow(fx_row[x], 2) + pow(fy_row[x], 2)) / scale_factor;
+    }
+
+    // Scale b/w 0 and 255
+    const auto [min_p, max_p] = std::ranges::minmax_element(
+        reinterpret_cast<float *>(temp.data), reinterpret_cast<float *>(temp.data + temp.elemSize() * temp.total()));
+
+    const int ub{255};
+    const int lb{0};
+    const float min{*min_p};
+    const float max{*max_p};
+
+    for (int y = 0; y < rows; y++) {
+
+        const auto temp_row   = temp.ptr<float>(y);
+        std::uint8_t *mag_row = mag.ptr<std::uint8_t>(y);
+
+        for (int x = 0; x < cols; x++)
+            mag_row[x] = static_cast<std::uint8_t>(std::round(((ub - lb) * (temp_row[x] / 255 - min)) / (max - min)));
+    }
 
     return mag;
 }
