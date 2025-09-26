@@ -102,7 +102,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
     const int half_size{fogd.rows / 2};
 
     cv::Mat f_part{};
-    f_part.create(img.size(), CV_8UC1);
+    f_part.create(img.rows - (fogd.rows - 1), img.cols - (fogd.cols - 1), CV_8UC1);
 
     std::vector<uint8_t> patch{};
     patch.reserve(fogd.rows * fogd.cols);
@@ -110,11 +110,14 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
     std::span<std::int16_t> fogd_flat{reinterpret_cast<std::int16_t *>(fogd.data),
                                       reinterpret_cast<std::int16_t *>(fogd.data + fogd.elemSize() * fogd.total())};
 
-    for (int y = half_size; y < img.rows - half_size; y++) {
+    const int rows{f_part.rows};
+    const int cols{f_part.cols};
+
+    for (int y = half_size; y < rows; y++) {
 
         std::uint8_t *f_row = f_part.ptr<std::uint8_t>(y);
 
-        for (int x = half_size; x < img.cols - half_size; x++) {
+        for (int x = half_size; x < cols; x++) {
             for (int yy = y - half_size; yy <= y + half_size; yy++) {
 
                 const std::uint8_t *padded_row = img.ptr<std::uint8_t>(yy);
