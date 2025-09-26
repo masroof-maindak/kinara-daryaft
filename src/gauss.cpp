@@ -90,8 +90,8 @@ std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivati
     return std::pair{gx_i16, gy_i16};
 }
 
-std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, const cv::Mat &fogd) {
-    if (img.type() != CV_8UC1)
+std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_padded, const cv::Mat &fogd) {
+    if (img_padded.type() != CV_8UC1)
         return std::unexpected("Unexpected image type; require CV_8UC1 (grayscale).");
 
     if (fogd.type() != CV_16SC1)
@@ -102,7 +102,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
     const int half_size{fogd.rows / 2};
 
     cv::Mat f_part{};
-    f_part.create(img.rows - (fogd.rows - 1), img.cols - (fogd.cols - 1), CV_8UC1);
+    f_part.create(img_padded.rows - (fogd.rows - 1), img_padded.cols - (fogd.cols - 1), CV_8UC1);
 
     std::vector<uint8_t> patch{};
     patch.reserve(fogd.rows * fogd.cols);
@@ -120,8 +120,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
         for (int x = half_size; x < cols; x++) {
             for (int yy = y - half_size; yy <= y + half_size; yy++) {
 
-                const std::uint8_t *padded_row = img.ptr<std::uint8_t>(yy);
-
+                const std::uint8_t *padded_row = img_padded.ptr<std::uint8_t>(yy);
                 for (int xx = x - half_size; xx <= x + half_size; xx++)
                     patch.emplace_back(padded_row[xx]);
             }

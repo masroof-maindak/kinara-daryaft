@@ -23,7 +23,7 @@ std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivati
 // img is 8UC1 (grayscale)
 // fogd is 16SC1 (16 bit signed int)
 // returns 8UC1 image (fx/fy) of edge detections as per input fogd (gx/gy)
-std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, const cv::Mat &fogd);
+std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_padded, const cv::Mat &fogd);
 
 cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy);
 
