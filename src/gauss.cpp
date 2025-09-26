@@ -110,16 +110,14 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
     std::span<std::int16_t> fogd_flat{reinterpret_cast<std::int16_t *>(fogd.data),
                                       reinterpret_cast<std::int16_t *>(fogd.data + fogd.elemSize() * fogd.total())};
 
-    const int rows{f_part.rows};
-    const int cols{f_part.cols};
+    for (int y = half_size; y < img_padded.rows - half_size; y++) {
 
-    for (int y = half_size; y < rows; y++) {
+        std::uint8_t *f_row = f_part.ptr<std::uint8_t>(y - half_size);
 
-        std::uint8_t *f_row = f_part.ptr<std::uint8_t>(y);
+        for (int x = half_size; x < img_padded.cols - half_size; x++) {
 
-        for (int x = half_size; x < cols; x++) {
+            // Populate patch
             for (int yy = y - half_size; yy <= y + half_size; yy++) {
-
                 const std::uint8_t *padded_row = img_padded.ptr<std::uint8_t>(yy);
                 for (int xx = x - half_size; xx <= x + half_size; xx++)
                     patch.emplace_back(padded_row[xx]);
@@ -127,7 +125,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
 
             const int dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
             // CHECK: Narrowing conversion. Take max?
-            f_row[x] = dot_prod;
+            f_row[x - half_size] = dot_prod;
             patch.clear();
         }
     }
