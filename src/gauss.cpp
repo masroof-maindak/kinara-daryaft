@@ -10,8 +10,11 @@ int compute_filter_size(float sigma, float T) {
 }
 
 std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_size, const float sigma) {
-    // TODO: check if sigma is in bounds
-    // TODO: check if filter size is positive and odd
+    if (sigma < 0.5)
+        return std::unexpected(std::format("Small sigma, expected sigma > 0.5: {}", sigma));
+
+    if (filter_size < 0 || filter_size % 2 != 0)
+        return std::unexpected(std::format("Filter size should be +ve & odd: {}", filter_size));
 
     cv::Mat filt{};
     filt.create(filter_size, filter_size, CV_32FC1);
@@ -40,8 +43,11 @@ std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_si
 
 std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivatives(const cv::Mat &filt_f,
                                                                                     const float sigma) {
-    // TODO: validate filt_f's type
-    // TODO: validate sigma's bounds
+    if (sigma < 0.5)
+        return std::unexpected(std::format("Small sigma, expected sigma > 0.5: {}", sigma));
+
+    if (filt_f.type() != CV_32FC1)
+        return std::unexpected("Filter was not of type CV_32FC1");
 
     cv::Mat gx_f{};
     cv::Mat gy_f{};
@@ -133,9 +139,12 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
     return f_part;
 }
 
-cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
-    // TODO: ensure fx and fy are equal size
-    // TODO: ensure fx and fy are type CV_8UC1
+std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
+    if (fx.size() != fy.size())
+        return std::unexpected(std::format("fx.size != fy.size ; {}x{} & {}x{}", fx.rows, fx.cols, fy.rows, fy.cols));
+
+    if (fx.type() != CV_8UC1 || fy.type() != CV_8UC1)
+        return std::unexpected("Invalid type for fx or fy; expected CV_8UC1");
 
     cv::Mat dir{};
     dir.create(fx.size(), CV_32FC1);
@@ -150,9 +159,12 @@ cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
     return dir;
 }
 
-cv::Mat compute_gradient_magnitude(const cv::Mat &fx, const cv::Mat &fy) {
-    // TODO: ensure fx and fy are equal size
-    // TODO: ensure fx and fy are type CV_8UC1
+std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx, const cv::Mat &fy) {
+    if (fx.size() != fy.size())
+        return std::unexpected(std::format("fx.size != fy.size ; {}x{} & {}x{}", fx.rows, fx.cols, fy.rows, fy.cols));
+
+    if (fx.type() != CV_8UC1 || fy.type() != CV_8UC1)
+        return std::unexpected("Invalid type for fx or fy; expected CV_8UC1");
 
     cv::Mat mag{};
     cv::Mat temp{};

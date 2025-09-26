@@ -70,9 +70,19 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    const auto grad_dir{compute_gradient_direction(fx, fy)};
+    auto grad_dir_expected{compute_gradient_direction(fx, fy)};
+    if (!grad_dir_expected.has_value()) {
+        std::println(stderr, "Failed to generate gradient directions: ", grad_dir_expected.error());
+        return EXIT_FAILURE;
+    }
+    const auto grad_dir{grad_dir_expected.value()};
 
-    const auto grad_mag{compute_gradient_magnitude(fx, fy)};
+    auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
+    if (!grad_mag_expected.has_value()) {
+        std::println(stderr, "Failed to generate gradient magections: ", grad_mag_expected.error());
+        return EXIT_FAILURE;
+    }
+    const auto grad_mag{grad_mag_expected.value()};
 
     auto mag_save_res_expected = save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma);
     if (!mag_save_res_expected.has_value()) {
