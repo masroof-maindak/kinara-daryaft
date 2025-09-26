@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }
     const auto [gx, gy]{part_der_result_expected.value()};
 
-    const cv::Mat img_padded{pad_image(img, gx.rows)};
+    const cv::Mat img_padded{pad_image(img, gx.rows / 2)};
 
     auto fx_expected{convolve_through_image(img_padded, gx)};
     if (!fx_expected.has_value()) {
