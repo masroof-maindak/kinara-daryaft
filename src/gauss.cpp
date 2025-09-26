@@ -137,11 +137,38 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img, c
 }
 
 cv::Mat compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
+    // TODO: ensure fx and fy are equal size
+    // TODO: ensure fx and fy are type CV_8UC1
+
     cv::Mat dir{};
+    dir.create(fx.size(), CV_32FC1);
+
+    const int rows{fx.rows};
+    const int cols{fx.cols};
+
+    // CHECK: div by 0
+    for (int i = 0; i < rows * cols; i++)
+        dir.data[i] = atanf(static_cast<float>(fy.data[i]) / fx.data[i]);
+
     return dir;
 }
 
 cv::Mat compute_gradient_magnitude(const cv::Mat &fx, const cv::Mat &fy) {
+    // TODO: ensure fx and fy are equal size
+    // TODO: ensure fx and fy are type CV_8UC1
+
     cv::Mat mag{};
+    mag.create(fx.size(), CV_8UC1);
+
+    const int rows{fx.rows};
+    const int cols{fx.cols};
+    const float scale_factor{256};
+
+    for (int i = 0; i < rows * cols; i++)
+        mag.data[i] = static_cast<int>(std::round(sqrt(pow(fx.data[i], 2) + pow(fy.data[i], 2) / scale_factor)));
+
+    // TODO: normalize b/w 0 and 100
+    // TODO: normalize patch-by-patch instead (to make result lighting invariant)
+
     return mag;
 }

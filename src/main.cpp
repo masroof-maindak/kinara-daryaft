@@ -70,7 +70,15 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // TODO: gradient direction/magnitude
+    const auto grad_dir{compute_gradient_direction(fx, fy)};
+
+    const auto grad_mag{compute_gradient_magnitude(fx, fy)};
+
+    auto mag_save_res_expected = save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma);
+    if (!mag_save_res_expected.has_value()) {
+        std::println(stderr, "Failed to save image fy: {}", mag_save_res_expected.error());
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
