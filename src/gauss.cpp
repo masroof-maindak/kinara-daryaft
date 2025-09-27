@@ -155,7 +155,7 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
 
     // CHECK: div by 0
     for (int i = 0; i < rows * cols; i++)
-        dir.data[i] = atanf(static_cast<float>(fy.data[i]) / fx.data[i]);
+        dir.data[i] = atanf(static_cast<float>(fy.data[i]) / (fx.data[i] == 0 ? 0.001 : fx.data[i]));
 
     return dir;
 }
