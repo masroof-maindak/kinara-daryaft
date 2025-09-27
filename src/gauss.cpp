@@ -104,7 +104,11 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
     if (fogd.type() != CV_16SC1)
         return std::unexpected("Unexpected partial derivative type; require CV_16SC1.");
 
-    // TODO: check if fogd is larger than image.
+    // NOTE: accounts for padding!
+    const int fogd_size{fogd.rows};
+    if (fogd_size > img_padded.rows || fogd_size > img_padded.cols)
+        return std::unexpected(
+            std::format("FOGD size {} can't exceed image res {}x{}.", fogd_size, img_padded.rows, img_padded.cols));
 
     const int half_size{fogd.rows / 2};
 
