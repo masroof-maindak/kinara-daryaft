@@ -201,6 +201,8 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
     const float min{*min_p};
     const float max{*max_p};
 
+    // TODO: handle edge case -- min == max
+
     for (int y = 0; y < rows; y++) {
 
         const auto temp_row   = temp.ptr<float>(y);
