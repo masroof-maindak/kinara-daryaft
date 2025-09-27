@@ -1,5 +1,6 @@
 #include <knr/gauss.h>
 
+#include <algorithm>
 #include <math.h>
 #include <numeric>
 #include <stdint.h>
