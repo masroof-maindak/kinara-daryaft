@@ -131,6 +131,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
             }
 
             const int dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
+            // CHECK: Dot product is negative???
             // CHECK: Narrowing conversion. Take max?
             f_row[x - half_size] = dot_prod;
             patch.clear();
@@ -153,7 +154,7 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
     const int rows{fx.rows};
     const int cols{fx.cols};
 
-    // CHECK: div by 0
+    // CHECK: determine in radians and convert to degrees + add 180 instead?
     for (int i = 0; i < rows * cols; i++)
         dir.data[i] = atanf(static_cast<float>(fy.data[i]) / (fx.data[i] == 0 ? 0.001 : fx.data[i]));
 
