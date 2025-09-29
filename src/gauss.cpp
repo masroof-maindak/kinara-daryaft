@@ -190,17 +190,17 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
             temp_row[x] = sqrtf(fx_row[x] * fx_row[x] + fy_row[x] * fy_row[x]) / scale_factor;
     }
 
-    return temp;
-    // FIXME: Scale magnitude b/w 0 and 255
-    const auto [min_p, max_p] = std::ranges::minmax_element(
-        reinterpret_cast<float *>(temp.data), reinterpret_cast<float *>(temp.data + temp.elemSize() * temp.total()));
+    // Scale magnitude b/w 0 and 255
+    const auto [min_p, max_p]{std::ranges::minmax_element(
+        reinterpret_cast<float *>(temp.data), reinterpret_cast<float *>(temp.data + temp.elemSize() * temp.total()))};
 
-    const int ub{255};
-    const int lb{0};
     const float min{*min_p};
     const float max{*max_p};
 
-    // TODO: handle edge case -- min == max
+    if (min == max) {
+        memset(mag.data, 0, mag.elemSize() * mag.total());
+        return mag;
+    }
 
     for (int y = 0; y < rows; y++) {
 
@@ -208,7 +208,7 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
         std::uint8_t *mag_row = mag.ptr<std::uint8_t>(y);
 
         for (int x = 0; x < cols; x++)
-            mag_row[x] = static_cast<std::uint8_t>(std::round(((ub - lb) * (temp_row[x] / 255 - min)) / (max - min)));
+            mag_row[x] = static_cast<std::uint8_t>(std::round((255 * (temp_row[x] - min)) / (max - min)));
     }
 
     return mag;
