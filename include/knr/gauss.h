@@ -26,7 +26,7 @@ std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivati
 std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_padded, const cv::Mat &fogd);
 
 // Takes 2x 32SC1 (fx, fy)
-// returns 32FC1
+// returns the QUANTIZED gradient direction as an 8UC1 matrix
 std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy);
 
 // Takes 2x 32SC1 (fx, fy)

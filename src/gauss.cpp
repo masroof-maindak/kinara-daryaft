@@ -1,4 +1,5 @@
 #include <knr/gauss.h>
+#include <knr/utils.h>
 
 #include <algorithm>
 #include <math.h>
@@ -151,19 +152,31 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
         return std::unexpected("Invalid type for fx or fy; expected CV_32SC1");
 
     cv::Mat dir{};
-    dir.create(fx.size(), CV_32FC1);
+    dir.create(fx.size(), CV_8UC1);
 
     const int rows{fx.rows};
     const int cols{fx.cols};
+    constexpr float rad_to_deg{180 / std::numbers::pi_v<float>};
+
+    using enum GradientDir;
 
     for (int y = 0; y < rows; y++) {
 
         const auto fx_row = fx.ptr<std::int32_t>(y);
         const auto fy_row = fy.ptr<std::int32_t>(y);
-        auto dir_row      = dir.ptr<float>(y);
+        auto dir_row      = dir.ptr<std::uint8_t>(y);
 
-        for (int x = 0; x < cols; x++)
-            dir_row[x] = atan2f(fy_row[x], fx_row[x]) * (180 / std::numbers::pi_v<float>);
+        for (int x = 0; x < cols; x++) {
+            float t{atan2f(fy_row[x], fx_row[x]) * rad_to_deg + 180};
+
+            dir_row[x] = ((t >= 0 && t < 22.5) || (t >= 157.5 && t < 202.5) || (t >= 337.5 && t <= 360)) ? +E_W
+                         : ((t >= 22.5 && t < 67.5) || (t >= 202.5 && t < 247.5))                        ? +NE_SW
+                         : ((t >= 67.5 && t < 112.5) || (t >= 247.5 && t < 292.5))                       ? +N_S
+                         : ((t >= 112.5 && t < 157.5) || (t >= 292.5 && t < 337.5))                      ? +NW_SE
+                                                                                                         : +Invalid;
+            if (dir_row[x] == 255)
+                return std::unexpected(std::format("Invalid theta encountered {}", t));
+        }
     }
 
     return dir;
