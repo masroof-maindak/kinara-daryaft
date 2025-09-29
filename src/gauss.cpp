@@ -113,7 +113,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
     const int half_size{fogd.rows / 2};
 
     cv::Mat f_part{};
-    f_part.create(img_padded.rows - (fogd.rows - 1), img_padded.cols - (fogd.cols - 1), CV_8UC1);
+    f_part.create(img_padded.rows - (fogd.rows - 1), img_padded.cols - (fogd.cols - 1), CV_32SC1);
 
     std::vector<uint8_t> patch{};
     patch.reserve(fogd.rows * fogd.cols);
@@ -123,7 +123,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
 
     for (int y = half_size; y < img_padded.rows - half_size; y++) {
 
-        std::uint8_t *f_row = f_part.ptr<std::uint8_t>(y - half_size);
+        std::int32_t *f_row = f_part.ptr<std::int32_t>(y - half_size);
 
         for (int x = half_size; x < img_padded.cols - half_size; x++) {
 
@@ -134,9 +134,7 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
                     patch.emplace_back(padded_row[xx]);
             }
 
-            const int dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
-            // CHECK: Dot product is negative???
-            // CHECK: Narrowing conversion. Take max?
+            const int32_t dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
             f_row[x - half_size] = dot_prod;
             patch.clear();
         }
@@ -149,8 +147,8 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
     if (fx.size() != fy.size())
         return std::unexpected(std::format("fx.size != fy.size ; {}x{} & {}x{}", fx.rows, fx.cols, fy.rows, fy.cols));
 
-    if (fx.type() != CV_8UC1 || fy.type() != CV_8UC1)
-        return std::unexpected("Invalid type for fx or fy; expected CV_8UC1");
+    if (fx.type() != CV_32SC1 || fy.type() != CV_32SC1)
+        return std::unexpected("Invalid type for fx or fy; expected CV_32SC1");
 
     cv::Mat dir{};
     dir.create(fx.size(), CV_32FC1);
@@ -169,8 +167,8 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
     if (fx.size() != fy.size())
         return std::unexpected(std::format("fx.size != fy.size ; {}x{} & {}x{}", fx.rows, fx.cols, fy.rows, fy.cols));
 
-    if (fx.type() != CV_8UC1 || fy.type() != CV_8UC1)
-        return std::unexpected("Invalid type for fx or fy; expected CV_8UC1");
+    if (fx.type() != CV_32SC1 || fy.type() != CV_32SC1)
+        return std::unexpected("Invalid type for fx or fy; expected CV_32SC1");
 
     cv::Mat mag{};
     cv::Mat temp{};
@@ -184,15 +182,16 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
     // Determine Magnitude
     for (int y = 0; y < rows; y++) {
 
-        const auto fx_row = fx.ptr<std::uint8_t>(y);
-        const auto fy_row = fy.ptr<std::uint8_t>(y);
+        const auto fx_row = fx.ptr<std::int32_t>(y);
+        const auto fy_row = fy.ptr<std::int32_t>(y);
         auto temp_row     = temp.ptr<float>(y);
 
         for (int x = 0; x < cols; x++)
-            temp_row[x] = sqrt(pow(fx_row[x], 2) + pow(fy_row[x], 2)) / scale_factor;
+            temp_row[x] = sqrtf(fx_row[x] * fx_row[x] + fy_row[x] * fy_row[x]) / scale_factor;
     }
 
-    // Scale b/w 0 and 255
+    return temp;
+    // FIXME: Scale magnitude b/w 0 and 255
     const auto [min_p, max_p] = std::ranges::minmax_element(
         reinterpret_cast<float *>(temp.data), reinterpret_cast<float *>(temp.data + temp.elemSize() * temp.total()));
 

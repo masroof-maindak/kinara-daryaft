@@ -54,11 +54,16 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat fx{fx_expected.value()};
 
-    auto fx_save_res_expected = save_image(fx, args.out_dir, img_name, "fx", args.sigma);
-    if (!fx_save_res_expected.has_value()) {
-        std::println(stderr, "Failed to save image fx: {}", fx_save_res_expected.error());
-        return EXIT_FAILURE;
-    }
+    /*
+     * NOTE: Fx & Yy can't be saved because they comprise 32 bit integers. This is a given because convolution
+     * w/ Gx & Gy can result in negative values.
+     */
+
+    // auto fx_save_res_expected = save_image(fx, args.out_dir, img_name, "fx", args.sigma);
+    // if (!fx_save_res_expected.has_value()) {
+    //     std::println(stderr, "Failed to save image fx: {}", fx_save_res_expected.error());
+    //     return EXIT_FAILURE;
+    // }
 
     const auto fy_expected{convolve_through_image(img_padded, gy)};
     if (!fy_expected.has_value()) {
@@ -67,11 +72,11 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat fy{fy_expected.value()};
 
-    auto fy_save_res_expected = save_image(fy, args.out_dir, img_name, "fy", args.sigma);
-    if (!fy_save_res_expected.has_value()) {
-        std::println(stderr, "Failed to save image fy: {}", fy_save_res_expected.error());
-        return EXIT_FAILURE;
-    }
+    // auto fy_save_res_expected = save_image(fy, args.out_dir, img_name, "fy", args.sigma);
+    // if (!fy_save_res_expected.has_value()) {
+    //     std::println(stderr, "Failed to save image fy: {}", fy_save_res_expected.error());
+    //     return EXIT_FAILURE;
+    // }
 
     // --- Gradient Direction ---
     auto grad_dir_expected{compute_gradient_direction(fx, fy)};
