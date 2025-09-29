@@ -2,9 +2,9 @@
 #include <knr/utils.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <math.h>
 #include <numeric>
-#include <stdint.h>
 
 int compute_filter_size(float sigma, float T) {
     const int half_size{static_cast<int>(std::round(sqrt(-std::logf(T)) * 2 * sigma * sigma))};
