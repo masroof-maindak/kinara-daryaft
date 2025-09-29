@@ -156,9 +156,15 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
     const int rows{fx.rows};
     const int cols{fx.cols};
 
-    // CHECK: determine in radians and convert to degrees + add 180 instead?
-    for (int i = 0; i < rows * cols; i++)
-        dir.data[i] = atanf(static_cast<float>(fy.data[i]) / (fx.data[i] == 0 ? 0.001 : fx.data[i]));
+    for (int y = 0; y < rows; y++) {
+
+        const auto fx_row = fx.ptr<std::int32_t>(y);
+        const auto fy_row = fy.ptr<std::int32_t>(y);
+        auto dir_row      = dir.ptr<float>(y);
+
+        for (int x = 0; x < cols; x++)
+            dir_row[x] = atan2f(fy_row[x], fx_row[x]) * (180 / std::numbers::pi_v<float>);
+    }
 
     return dir;
 }
