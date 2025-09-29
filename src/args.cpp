@@ -11,7 +11,7 @@ std::expected<ArgConfig, std::string> parse_args(int argc, char *argv[]) {
 
     prog.add_argument("-s", "--sigma")
         .help("specify value of sigma to be used for determining the Gaussian filter's size")
-        .default_value(0.5f)
+        .default_value(1.4f)
         .store_into(args.sigma) // Broken when it's at the bottom, because why
                                 // wouldn't it be.
         .scan<'g', float>();
