@@ -78,13 +78,24 @@ int main(int argc, char *argv[]) {
     //     return EXIT_FAILURE;
     // }
 
-    // --- Gradient Direction ---
+    // --- Gradient Direction + Save ---
     auto grad_dir_expected{compute_gradient_direction(fx, fy)};
     if (!grad_dir_expected.has_value()) {
         std::println(stderr, "Failed to generate gradient directions: ", grad_dir_expected.error());
         return EXIT_FAILURE;
     }
     const cv::Mat grad_dir{grad_dir_expected.value()};
+
+    /*
+     * NOTE: Quantized gradient directions also have no reason to be saved because the only values they contain are 0,
+     * 1, 2, 3.
+     */
+
+    // auto dir_save_res_expected = save_image(grad_dir, args.out_dir, img_name, "quantized-dir", args.sigma);
+    // if (!dir_save_res_expected.has_value()) {
+    //     std::println(stderr, "Failed to save image grad_dir: {}", dir_save_res_expected.error());
+    //     return EXIT_FAILURE;
+    // }
 
     // --- Gradient Magnitude + Save ---
     auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
@@ -96,9 +107,11 @@ int main(int argc, char *argv[]) {
 
     auto mag_save_res_expected = save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma);
     if (!mag_save_res_expected.has_value()) {
-        std::println(stderr, "Failed to save image fy: {}", mag_save_res_expected.error());
+        std::println(stderr, "Failed to save image grad_mag: {}", mag_save_res_expected.error());
         return EXIT_FAILURE;
     }
+
+    // Non-Maximal Suppresion
 
     return EXIT_SUCCESS;
 }
