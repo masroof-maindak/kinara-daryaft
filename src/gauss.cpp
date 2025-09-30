@@ -45,8 +45,8 @@ std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_si
     return filt;
 }
 
-std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivatives(const cv::Mat &filt_f,
-                                                                                    const float sigma) {
+std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_gaussian_derivatives(const cv::Mat &filt_f,
+                                                                                     const float sigma) {
     if (sigma < 0.5)
         return std::unexpected(std::format("Small sigma, expected sigma > 0.5: {}", sigma));
 

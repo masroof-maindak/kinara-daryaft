@@ -1,6 +1,7 @@
 #include <knr/args.h>
 #include <knr/gauss.h>
 #include <knr/io.h>
+#include <knr/nms.h>
 #include <knr/utils.h>
 
 #include <opencv2/opencv.hpp>
@@ -23,7 +24,7 @@ int main(int argc, char *argv[]) {
     // --- Load Image ---
     auto img_expected = load_image(args.img_path);
     if (!img_expected.has_value()) {
-        std::println(stderr, "Failed to load image: {}", args_expected.error());
+        std::println(stderr, "Failed to load image: {}", img_expected.error());
         return EXIT_FAILURE;
     }
     const cv::Mat img{img_expected.value()};
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat filt{gaussian_filt_expected.value()};
 
-    auto part_der_result_expected{compute_partial_derivatives(filt, args.sigma)};
+    auto part_der_result_expected{compute_gaussian_derivatives(filt, args.sigma)};
     if (!part_der_result_expected.has_value()) {
         std::println(stderr, "Failed to partial derivatives of Gaussian: {}", part_der_result_expected.error());
         return EXIT_FAILURE;
@@ -112,6 +113,16 @@ int main(int argc, char *argv[]) {
     }
 
     // Non-Maximal Suppresion
+    auto nms_mag_expected{non_maximum_suppression(grad_mag)};
+    if (!nms_mag_expected.has_value()) {
+        std::println(stderr, "Failed to generate nms mat: ", nms_mag_expected.error());
+        return EXIT_FAILURE;
+    }
+    const cv::Mat nms_mag{nms_mag_expected.value()};
+
+    // TODO: Hysteresis Thresholding
+
+    // CHECK: move value out of std::expected?
 
     return EXIT_SUCCESS;
 }

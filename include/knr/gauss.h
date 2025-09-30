@@ -16,8 +16,8 @@ std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_si
 
 // Computes Gx and Gy given a matrix of floats representing a Gaussian filter
 // Gx and Gy hold 16 bit integers
-std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_partial_derivatives(const cv::Mat &filt_f,
-                                                                                    const float sigma);
+std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_gaussian_derivatives(const cv::Mat &filt_f,
+                                                                                     const float sigma);
 
 // Convolves a first-order Gaussian derivative (Gx or Gy) through a (padded!) source image
 // img is 8UC1 (grayscale)
