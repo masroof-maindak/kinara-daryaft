@@ -6,6 +6,6 @@
 #include <expected>
 #include <string>
 
-std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &mag);
+std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_mag, const cv::Mat &grad_dir);
 
 #endif // NMS_H

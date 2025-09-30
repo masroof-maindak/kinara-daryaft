@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // Non-Maximal Suppresion
-    auto nms_mag_expected{non_maximum_suppression(grad_mag)};
+    // Non-Maximum Suppresion
+    auto nms_mag_expected{non_maximum_suppression(grad_mag, grad_dir)};
     if (!nms_mag_expected.has_value()) {
         std::println(stderr, "Failed to generate nms mat: ", nms_mag_expected.error());
         return EXIT_FAILURE;
