@@ -5,9 +5,9 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <cstdlib>
 #include <filesystem>
 #include <print>
-#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
     // --- Config ---

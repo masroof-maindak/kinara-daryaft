@@ -2,8 +2,8 @@
 #include <knr/utils.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
-#include <math.h>
 #include <numeric>
 
 int compute_filter_size(float sigma, float T) {
