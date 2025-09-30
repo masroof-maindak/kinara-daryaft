@@ -29,7 +29,7 @@ std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_si
     float sum{};
     for (int y = 0; y < filter_size; y++) {
 
-        float *filt_row = filt.ptr<float>(y);
+        auto *filt_row{filt.ptr<float>(y)};
         const int dy{y - half_size};
 
         for (int x = 0; x < filter_size; x++) {
@@ -66,9 +66,9 @@ std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_gaussian_derivat
     for (int y = 0; y < filter_size; y++) {
 
         const int dy{y - half_size};
-        const float *filt_f_row = filt_f.ptr<float>(y);
-        float *gx_f_row         = gx_f.ptr<float>(y);
-        float *gy_f_row         = gy_f.ptr<float>(y);
+        const auto *filt_f_row{filt_f.ptr<float>(y)};
+        auto *gx_f_row{gx_f.ptr<float>(y)};
+        auto *gy_f_row{gy_f.ptr<float>(y)};
 
         for (int x = 0; x < filter_size; x++) {
             const int dx{x - half_size};
@@ -86,10 +86,10 @@ std::expected<std::pair<cv::Mat, cv::Mat>, std::string> compute_gaussian_derivat
     const float scale_factor{256};
 
     for (int y = 0; y < filter_size; y++) {
-        const float *gx_f_row    = gx_f.ptr<float>(y);
-        const float *gy_f_row    = gy_f.ptr<float>(y);
-        std::int16_t *gx_i16_row = gx_i16.ptr<std::int16_t>(y);
-        std::int16_t *gy_i16_row = gy_i16.ptr<std::int16_t>(y);
+        const auto *gx_f_row{gx_f.ptr<float>(y)};
+        const auto *gy_f_row{gy_f.ptr<float>(y)};
+        auto *gx_i16_row{gx_i16.ptr<std::int16_t>(y)};
+        auto *gy_i16_row{gy_i16.ptr<std::int16_t>(y)};
 
         for (int x = 0; x < filter_size; x++) {
             gx_i16_row[x] = static_cast<std::int16_t>(std::round(gx_f_row[x] * scale_factor));
@@ -126,18 +126,18 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
 
     for (int y = half_size; y < img_padded.rows - half_size; y++) {
 
-        std::int32_t *f_row = f_part.ptr<std::int32_t>(y - half_size);
+        auto *f_row{f_part.ptr<std::int32_t>(y - half_size)};
 
         for (int x = half_size; x < img_padded.cols - half_size; x++) {
 
             // Populate patch
             for (int yy = y - half_size; yy <= y + half_size; yy++) {
-                const std::uint8_t *padded_row = img_padded.ptr<std::uint8_t>(yy);
+                const auto *padded_row{img_padded.ptr<std::uint8_t>(yy)};
                 for (int xx = x - half_size; xx <= x + half_size; xx++)
                     patch.emplace_back(padded_row[xx]);
             }
 
-            const int32_t dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
+            const std::int32_t dot_prod{std::inner_product(patch.begin(), patch.end(), fogd_flat.begin(), 0)};
             f_row[x - half_size] = dot_prod;
             patch.clear();
         }

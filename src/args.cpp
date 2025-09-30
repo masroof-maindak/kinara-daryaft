@@ -37,7 +37,7 @@ std::expected<ArgConfig, std::string> parse_args(int argc, char *argv[]) {
     try {
         prog.parse_args(argc, argv);
     } catch (const std::exception &err) {
-        auto errmsg = std::format("{}\n\n{}", err.what(), prog.usage());
+        auto errmsg{std::format("{}\n\n{}", err.what(), prog.usage())};
         return std::unexpected(errmsg);
     }
 

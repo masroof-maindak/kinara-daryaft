@@ -26,9 +26,9 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
 
     for (int y = 0; y < rows; y++) {
 
-        const auto fx_row = fx.ptr<std::int32_t>(y);
-        const auto fy_row = fy.ptr<std::int32_t>(y);
-        auto dir_row      = dir.ptr<std::uint8_t>(y);
+        const auto fx_row{fx.ptr<std::int32_t>(y)};
+        const auto fy_row{fy.ptr<std::int32_t>(y)};
+        auto dir_row{dir.ptr<std::uint8_t>(y)};
 
         for (int x = 0; x < cols; x++) {
             float t{atan2f(fy_row[x], fx_row[x]) * rad_to_deg + 180};
@@ -55,8 +55,8 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
 
     cv::Mat mag{};
     cv::Mat temp{};
-    temp.create(fx.size(), CV_32FC1);
     mag.create(fx.size(), CV_8UC1);
+    temp.create(fx.size(), CV_32FC1);
 
     const int rows{fx.rows};
     const int cols{fx.cols};
@@ -65,9 +65,9 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
     // Determine Magnitude
     for (int y = 0; y < rows; y++) {
 
-        const auto fx_row = fx.ptr<std::int32_t>(y);
-        const auto fy_row = fy.ptr<std::int32_t>(y);
-        auto temp_row     = temp.ptr<float>(y);
+        const auto fx_row{fx.ptr<std::int32_t>(y)};
+        const auto fy_row{fy.ptr<std::int32_t>(y)};
+        auto temp_row{temp.ptr<float>(y)};
 
         for (int x = 0; x < cols; x++)
             temp_row[x] = sqrtf(fx_row[x] * fx_row[x] + fy_row[x] * fy_row[x]) / scale_factor;
@@ -87,8 +87,8 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
 
     for (int y = 0; y < rows; y++) {
 
-        const auto temp_row   = temp.ptr<float>(y);
-        std::uint8_t *mag_row = mag.ptr<std::uint8_t>(y);
+        const auto temp_row{temp.ptr<float>(y)};
+        auto *mag_row{mag.ptr<std::uint8_t>(y)};
 
         for (int x = 0; x < cols; x++)
             mag_row[x] = static_cast<std::uint8_t>(std::round((255 * (temp_row[x] - min)) / (max - min)));

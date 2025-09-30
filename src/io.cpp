@@ -19,7 +19,7 @@ std::expected<void, std::string> save_image(const cv::Mat &img, const std::strin
             return std::unexpected("Failed to create directory: " + e.message());
     }
 
-    auto fname = std::format("{}/{}_{}_{}.jpg", out_dir, img_name, phase, sigma);
+    auto fname{std::format("{}/{}_{}_{}.jpg", out_dir, img_name, phase, sigma)};
     // TODO: handle imwrite errors
     cv::imwrite(fname, img);
 

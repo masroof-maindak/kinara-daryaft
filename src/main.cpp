@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     const std::string img_name{std::filesystem::path{args.img_path}.stem()};
 
     // --- Load Image ---
-    auto img_expected = load_image(args.img_path);
+    auto img_expected{load_image(args.img_path)};
     if (!img_expected.has_value()) {
         std::println(stderr, "Failed to load image: {}", img_expected.error());
         return EXIT_FAILURE;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
      * w/ Gx & Gy can result in negative values.
      */
 
-    // auto fx_save_res_expected = save_image(fx, args.out_dir, img_name, "fx", args.sigma);
+    // auto fx_save_res_expected{save_image(fx,args.out_dir, img_name, "fx", args.sigma)};
     // if (!fx_save_res_expected.has_value()) {
     //     std::println(stderr, "Failed to save image fx: {}", fx_save_res_expected.error());
     //     return EXIT_FAILURE;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat fy{fy_expected.value()};
 
-    // auto fy_save_res_expected = save_image(fy, args.out_dir, img_name, "fy", args.sigma);
+    // auto fy_save_res_expected{save_image(fy, args.out_dir, img_name, "fy", args.sigma)};
     // if (!fy_save_res_expected.has_value()) {
     //     std::println(stderr, "Failed to save image fy: {}", fy_save_res_expected.error());
     //     return EXIT_FAILURE;
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
      * 1, 2, 3.
      */
 
-    // auto dir_save_res_expected = save_image(grad_dir, args.out_dir, img_name, "quantized-dir", args.sigma);
+    // auto dir_save_res_expected{save_image(grad_dir, args.out_dir, img_name, "quantized-dir", args.sigma)};
     // if (!dir_save_res_expected.has_value()) {
     //     std::println(stderr, "Failed to save image grad_dir: {}", dir_save_res_expected.error());
     //     return EXIT_FAILURE;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat grad_mag{grad_mag_expected.value()};
 
-    auto mag_save_res_expected = save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma);
+    auto mag_save_res_expected{save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma)};
     if (!mag_save_res_expected.has_value()) {
         std::println(stderr, "Failed to save image grad_mag: {}", mag_save_res_expected.error());
         return EXIT_FAILURE;
