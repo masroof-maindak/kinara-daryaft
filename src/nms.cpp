@@ -22,19 +22,18 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
     const int cols{nms_mag.cols};
 
     for (int y = 0; y < rows; y++) {
-        for (int x = 0; x < cols; y++) {
+        for (int x = 0; x < cols; x++) {
             const auto dir{grad_dir.at<std::uint8_t>(y, x)};
 
             NeighbourPx n1{}, n2{};
 
             switch (static_cast<GradientDir>(dir)) {
             case E_W:
-                if (y > 0) // up
-                    n1 = {y - 1, x};
+                if (x > 0) // left
+                    n1 = {y, x - 1};
 
-                if (y + 1 < rows) // down
-                    n2 = {y + 1, x};
-
+                if (x + 1 < cols) // right
+                    n2 = {y, x + 1};
                 break;
             case NE_SW:
                 if (y > 0 && x > 0) // top-left
@@ -45,11 +44,11 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
 
                 break;
             case N_S:
-                if (x > 0) // left
-                    n1 = {y, x - 1};
+                if (y > 0) // up
+                    n1 = {y - 1, x};
 
-                if (x + 1 < cols) // right
-                    n1 = {y, x + 1};
+                if (y + 1 < rows) // down
+                    n2 = {y + 1, x};
 
                 break;
             case NW_SE:
