@@ -1,8 +1,10 @@
 #include <knr/nms.h>
+#include <knr/utils.h>
 
 #include <opencv2/opencv.hpp>
 
 #include <cstdint>
+#include <optional>
 
 std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_mag, const cv::Mat &grad_dir) {
     if (grad_mag.type() != CV_8UC1)
@@ -11,28 +13,69 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
     if (grad_dir.type() != CV_8UC1)
         return std::unexpected("Input direction matrix is not 8UC1");
 
-    cv::Mat nms_mag{};
-    nms_mag.create(grad_mag.size(), grad_mag.type());
+    using enum GradientDir;
+    using NeighbourPx = std::optional<std::pair<int, int>>;
+
+    cv::Mat nms_mag{grad_mag.size(), grad_mag.type(), cv::Scalar::all(0)};
 
     const int rows{nms_mag.rows};
     const int cols{nms_mag.cols};
 
-    // CHECK: leave 1 row/col's worth of padding
-
     for (int y = 0; y < rows; y++) {
-
-        const auto *mag_row{grad_mag.ptr<std::uint8_t>(y)};
-        const auto *dir_row{grad_dir.ptr<std::uint8_t>(y)};
-        auto *nms_row{nms_mag.ptr<std::uint8_t>(y)};
-
         for (int x = 0; x < cols; y++) {
-            /*
-             * TODO: For every nearby edge in the edge map (intensity matrix) that shares the same direction, if the
-             * current pixel in consideration has a higher intensity than them, reduce the others to zero.
-             *
-             * CHECK: What classifies as a 'vicinity' i.e how to pick 'nearby' edges. Could I just add a black 1 px-wide
-             * border (we already have pad_image in utils.cpp) and then check all 8 neighbouring pixels?
-             */
+            const auto dir{grad_dir.at<std::uint8_t>(y, x)};
+
+            NeighbourPx n1{}, n2{};
+
+            switch (static_cast<GradientDir>(dir)) {
+            case E_W:
+                if (y > 0) // up
+                    n1 = {y - 1, x};
+
+                if (y + 1 < rows) // down
+                    n2 = {y + 1, x};
+
+                break;
+            case NE_SW:
+                if (y > 0 && x > 0) // top-left
+                    n1 = {y - 1, x - 1};
+
+                if (y + 1 < rows && x + 1 < cols) // bottom-right
+                    n2 = {y + 1, x + 1};
+
+                break;
+            case N_S:
+                if (x > 0) // left
+                    n1 = {y, x - 1};
+
+                if (x + 1 < cols) // right
+                    n1 = {y, x + 1};
+
+                break;
+            case NW_SE:
+                if (y > 0 && x + 1 < cols) // top-right
+                    n1 = {y - 1, x + 1};
+
+                if (y + 1 < rows && x > 0) // bottom-left
+                    n2 = {y + 1, x - 1};
+
+                break;
+            default:
+                return std::unexpected("Gradient direction matrix had unexpected value: {}");
+            }
+
+            auto mag = [grad_mag](std::pair<int, int> p) -> std::uint8_t {
+                return grad_mag.at<std::uint8_t>(p.first, p.second);
+            };
+
+            // CHECK: Should n1 and n2's gradient direction be the same as `dir`'s ?
+
+            if (n1.has_value() && n2.has_value()) {
+                const auto curr_mag{mag({y, x})};
+
+                if (curr_mag > mag(*n1) && curr_mag > mag(*n2))
+                    nms_mag.at<std::uint8_t>(y, x) = curr_mag;
+            }
         }
     }
 

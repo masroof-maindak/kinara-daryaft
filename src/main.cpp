@@ -45,8 +45,13 @@ int main(int argc, char *argv[]) {
     }
     const auto [gx, gy]{part_der_result_expected.value()};
 
-    // --- Fx/Fy + Save ---
+    // --- Fx/Fy ---
     const cv::Mat img_padded{pad_image(img, gx.rows / 2)};
+
+    /*
+     * NOTE: Fx & Yy can't be saved because they comprise 32 bit integers. This is a given because convolution
+     * w/ Gx & Gy can result in negative values.
+     */
 
     auto fx_expected{convolve_through_image(img_padded, gx)};
     if (!fx_expected.has_value()) {
@@ -55,17 +60,6 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat fx{fx_expected.value()};
 
-    /*
-     * NOTE: Fx & Yy can't be saved because they comprise 32 bit integers. This is a given because convolution
-     * w/ Gx & Gy can result in negative values.
-     */
-
-    // auto fx_save_res_expected{save_image(fx,args.out_dir, img_name, "fx", args.sigma)};
-    // if (!fx_save_res_expected.has_value()) {
-    //     std::println(stderr, "Failed to save image fx: {}", fx_save_res_expected.error());
-    //     return EXIT_FAILURE;
-    // }
-
     const auto fy_expected{convolve_through_image(img_padded, gy)};
     if (!fy_expected.has_value()) {
         std::println(stderr, "Failed to compute image fy: {}", fy_expected.error());
@@ -73,13 +67,7 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat fy{fy_expected.value()};
 
-    // auto fy_save_res_expected{save_image(fy, args.out_dir, img_name, "fy", args.sigma)};
-    // if (!fy_save_res_expected.has_value()) {
-    //     std::println(stderr, "Failed to save image fy: {}", fy_save_res_expected.error());
-    //     return EXIT_FAILURE;
-    // }
-
-    // --- Gradient Direction + Save ---
+    // --- Gradient Direction ---
     auto grad_dir_expected{compute_gradient_direction(fx, fy)};
     if (!grad_dir_expected.has_value()) {
         std::println(stderr, "Failed to generate gradient directions: ", grad_dir_expected.error());
@@ -91,12 +79,6 @@ int main(int argc, char *argv[]) {
      * NOTE: Quantized gradient directions also have no reason to be saved because the only values they contain are 0,
      * 1, 2, 3.
      */
-
-    // auto dir_save_res_expected{save_image(grad_dir, args.out_dir, img_name, "quantized-dir", args.sigma)};
-    // if (!dir_save_res_expected.has_value()) {
-    //     std::println(stderr, "Failed to save image grad_dir: {}", dir_save_res_expected.error());
-    //     return EXIT_FAILURE;
-    // }
 
     // --- Gradient Magnitude + Save ---
     auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
@@ -112,13 +94,19 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // Non-Maximum Suppresion
+    // --- Non-Maximum Suppresion + Save ---
     auto nms_mag_expected{non_maximum_suppression(grad_mag, grad_dir)};
     if (!nms_mag_expected.has_value()) {
         std::println(stderr, "Failed to generate nms mat: ", nms_mag_expected.error());
         return EXIT_FAILURE;
     }
     const cv::Mat nms_mag{nms_mag_expected.value()};
+
+    auto nms_save_res_expected{save_image(nms_mag, args.out_dir, img_name, "nms", args.sigma)};
+    if (!nms_save_res_expected.has_value()) {
+        std::println(stderr, "Failed to save image nms: {}", nms_save_res_expected.error());
+        return EXIT_FAILURE;
+    }
 
     // TODO: Hysteresis Thresholding
 
