@@ -30,6 +30,7 @@ add_executable(
     "src/utils.cpp"
     "src/gradient.cpp"
     "src/nms.cpp"
+    "src/hysteresis.cpp"
 )
 target_include_directories(knr PRIVATE "include/" ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(knr PRIVATE argparse ${OpenCV_LIBS})

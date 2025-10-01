@@ -1,5 +1,6 @@
 #include <knr/args.h>
 #include <knr/gauss.h>
+#include <knr/hysteresis.h>
 #include <knr/io.h>
 #include <knr/nms.h>
 #include <knr/utils.h>
@@ -108,7 +109,20 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // TODO: Hysteresis Thresholding
+    // --- Hysteresis Thresholding + Save ---
+    auto thresholded_mag_expected{apply_hysteresis(nms_mag, args.low_threshold, args.high_threshold)};
+    if (!thresholded_mag_expected.has_value()) {
+        std::println(stderr, "Failed to apply hysteresis thresholding: ", thresholded_mag_expected.error());
+        return EXIT_FAILURE;
+    }
+    const cv::Mat thresholded_mag{thresholded_mag_expected.value()};
+
+    const auto hysteresis_phase_name{std::format("hysteresis_{}_{}", args.low_threshold, args.high_threshold)};
+    auto thresh_mag_save_res_expected{save_image(nms_mag, args.out_dir, img_name, hysteresis_phase_name, args.sigma)};
+    if (!thresh_mag_save_res_expected.has_value()) {
+        std::println(stderr, "Failed to save edge detection image: {}", thresh_mag_save_res_expected.error());
+        return EXIT_FAILURE;
+    }
 
     // CHECK: move value out of std::expected?
 
