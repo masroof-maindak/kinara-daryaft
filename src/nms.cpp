@@ -67,8 +67,6 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
                 return grad_mag.at<std::uint8_t>(p.first, p.second);
             };
 
-            // CHECK: Should n1 and n2's gradient direction be the same as `dir`'s ?
-
             if (n1.has_value() && n2.has_value()) {
                 const auto curr_mag{mag({y, x})};
 
