@@ -16,4 +16,4 @@ cv::Mat pad_image(const cv::Mat &img, const int padding) {
     return padded;
 }
 
-std::uint8_t operator+(GradientDir gd) { return std::to_underlying(gd); }
+std::uint8_t operator+(const GradientDir gd) { return std::to_underlying(gd); }
