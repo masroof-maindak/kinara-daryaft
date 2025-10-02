@@ -49,11 +49,6 @@ int main(int argc, char *argv[]) {
     // --- Fx/Fy ---
     const cv::Mat img_padded{pad_image(img, gx.rows / 2)};
 
-    /*
-     * NOTE: Fx & Yy can't be saved because they comprise 32 bit integers. This is a given because convolution
-     * w/ Gx & Gy can result in negative values.
-     */
-
     const auto fx_expected{convolve_through_image(img_padded, gx)};
     if (!fx_expected.has_value()) {
         std::println(stderr, "Failed to compute image fx: {}", fx_expected.error());
@@ -75,11 +70,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     const cv::Mat grad_dir{grad_dir_expected.value()};
-
-    /*
-     * NOTE: Quantized gradient directions also have no reason to be saved because the only values they contain are 0,
-     * 1, 2, 3.
-     */
 
     // --- Gradient Magnitude + Save ---
     const auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
@@ -115,16 +105,14 @@ int main(int argc, char *argv[]) {
         std::println(stderr, "Failed to apply hysteresis thresholding: ", thresholded_mag_expected.error());
         return EXIT_FAILURE;
     }
-    const cv::Mat thresholded_mag{thresholded_mag_expected.value()};
+    const cv::Mat thresh_mag{thresholded_mag_expected.value()};
 
-    const auto hysteresis_phase_name{std::format("hysteresis_{}_{}", args.low_threshold, args.high_threshold)};
-    const auto thresh_mag_save_expected{save_image(nms_mag, args.out_dir, img_name, hysteresis_phase_name, args.sigma)};
+    const auto hyst_phase_name{std::format("hysteresis_{}_{}", args.low_threshold, args.high_threshold)};
+    const auto thresh_mag_save_expected{save_image(thresh_mag, args.out_dir, img_name, hyst_phase_name, args.sigma)};
     if (!thresh_mag_save_expected.has_value()) {
         std::println(stderr, "Failed to save edge detection image: {}", thresh_mag_save_expected.error());
         return EXIT_FAILURE;
     }
-
-    // CHECK: move value out of std::expected?
 
     return EXIT_SUCCESS;
 }
