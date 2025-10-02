@@ -16,13 +16,13 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
     if (mag.type() != CV_8UC1)
         return std::unexpected("Expected intensity matrix to be of type CV_8UC1");
 
-    cv::Mat temp_mag{pad_image(mag, 1)};
+    cv::Mat padded_mag{pad_image(mag, 1)};
     cv::Mat thresh_mag{mag.size(), CV_8UC1, cv::Scalar::all(0)};
 
     std::unordered_set<Px, HashPx> visited{};
 
-    auto mag_at_px = [temp_mag](std::pair<int, int> p) -> std::uint8_t {
-        return temp_mag.at<std::uint8_t>(p.first, p.second);
+    auto mag_at_px = [padded_mag](std::pair<int, int> p) -> std::uint8_t {
+        return padded_mag.at<std::uint8_t>(p.first, p.second);
     };
 
     for (int y = 1; y < mag.rows - 1; y++) {
@@ -47,9 +47,6 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
                         continue;
 
                     thresh_mag.at<std::uint8_t>(px.first - 1, px.second - 1) = curr_mag;
-
-                    const auto px_y{px.first};
-                    const auto px_x{px.second};
 
                     std::array<Px, 8> neighbours{{{px.first - 1, px.second - 1},
                                                   {px.first - 1, px.second},
