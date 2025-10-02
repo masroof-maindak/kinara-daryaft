@@ -20,4 +20,6 @@ enum class GradientDir : std::uint8_t {
 
 std::uint8_t operator+(const GradientDir gd);
 
+using Px = std::pair<int, int>;
+
 #endif // UTILS_H

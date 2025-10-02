@@ -23,24 +23,24 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
         for (int x = 1; x < cols - 1; x++) {
             const auto dir{grad_dir.at<std::uint8_t>(y, x)};
 
-            std::pair<int, int> n1{}, n2{};
+            Px n1{}, n2{};
 
             switch (static_cast<GradientDir>(dir)) {
             case E_W:
-                n1 = {y, x - 1}; // left
-                n2 = {y, x + 1}; // right
+                n1 = {y, x - 1};
+                n2 = {y, x + 1};
                 break;
             case NE_SW:
-                n1 = {y - 1, x - 1}; // top-left
-                n2 = {y + 1, x + 1}; // bottom-right
+                n1 = {y - 1, x - 1};
+                n2 = {y + 1, x + 1};
                 break;
             case N_S:
-                n1 = {y - 1, x}; // up
-                n2 = {y + 1, x}; // down
+                n1 = {y - 1, x};
+                n2 = {y + 1, x};
                 break;
             case NW_SE:
-                n1 = {y - 1, x + 1}; // top-right
-                n2 = {y + 1, x - 1}; // bottom-left
+                n1 = {y - 1, x + 1};
+                n2 = {y + 1, x - 1};
                 break;
             default:
                 return std::unexpected("Gradient direction matrix had unexpected value: {}");
