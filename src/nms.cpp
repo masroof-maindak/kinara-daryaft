@@ -14,6 +14,7 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
     if (grad_dir.type() != CV_8UC1)
         return std::unexpected("Input direction matrix is not 8UC1");
 
+    const cv::Mat padded_mag{pad_image(grad_mag, 1)};
     cv::Mat nms_mag{grad_mag.size(), grad_mag.type(), cv::Scalar::all(0)};
 
     const int rows{nms_mag.rows};
@@ -21,7 +22,7 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
 
     for (int y = 1; y < rows - 1; y++) {
         for (int x = 1; x < cols - 1; x++) {
-            const auto dir{grad_dir.at<std::uint8_t>(y, x)};
+            const auto dir{grad_dir.at<std::uint8_t>(y - 1, x - 1)};
 
             Px n1{}, n2{};
 
@@ -46,14 +47,14 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
                 return std::unexpected("Gradient direction matrix had unexpected value: {}");
             }
 
-            auto mag_at_px = [grad_mag](std::pair<int, int> p) -> std::uint8_t {
-                return grad_mag.at<std::uint8_t>(p.first, p.second);
+            auto mag_at_px = [padded_mag](std::pair<int, int> p) -> std::uint8_t {
+                return padded_mag.at<std::uint8_t>(p.first, p.second);
             };
 
             const auto curr_mag{mag_at_px({y, x})};
 
             if (curr_mag > mag_at_px(n1) && curr_mag > mag_at_px(n2))
-                nms_mag.at<std::uint8_t>(y, x) = curr_mag;
+                nms_mag.at<std::uint8_t>(y - 1, x - 1) = curr_mag;
         }
     }
 
