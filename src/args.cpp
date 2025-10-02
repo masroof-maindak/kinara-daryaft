@@ -59,6 +59,13 @@ std::expected<ArgConfig, std::string> parse_args(int argc, char *argv[]) {
             return std::unexpected(std::format("high threshold must be +ve: {}", i));
     }
 
+    if (prog.is_used("-lt") && prog.is_used("-ht")) {
+        int l{prog.get<int>("-lt")};
+        int h{prog.get<int>("-ht")};
+        if (h <= l)
+            return std::unexpected(std::format("tH must exceed tL: {} and {}", h, l));
+    }
+
     if (prog.is_used("-s")) {
         float f{prog.get<float>("-s")};
         if (f < 0.5)
