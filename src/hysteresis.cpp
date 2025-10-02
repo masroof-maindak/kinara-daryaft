@@ -35,11 +35,11 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
 
             if (mag_at_px(curr_px) > high_thresh) {
                 std::queue<Px> to_visit({curr_px});
+                visited.insert(curr_px);
 
                 while (!to_visit.empty()) {
                     const auto px = to_visit.front();
                     to_visit.pop();
-                    visited.insert(px);
 
                     const auto curr_mag = mag_at_px(px);
 
@@ -57,9 +57,11 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
                                                   {px.first + 1, px.second},
                                                   {px.first + 1, px.second + 1}}};
 
-                    for (const auto n : neighbours)
+                    for (const auto n : neighbours) {
                         if (!visited.contains(n))
                             to_visit.push(n);
+                        visited.insert(n);
+                    }
                 }
             }
         }
