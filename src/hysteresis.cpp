@@ -25,12 +25,21 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
         return padded_mag.at<std::uint8_t>(p.first, p.second);
     };
 
-    // TODO: optimise performance
+    /*
+     * TODO: Optimise performance.
+     *
+     * First identify what is the most costly part of the function:
+     * - `visited` accesses? Try replacing it w/ a boolean map.
+     * - While loop? Try a recursive solution and pray the compiler somehow optimises it to the moon and back.
+     * - Non-cache-friendly memory accesses? Maybe store high-threshold pixels during a first pass and iterate through
+     * rows on subsequent passes whilst maintaining a map of coordinates to know when you're 'above' or 'below' a
+     * high-threshold pixel.
+     */
 
     for (int y = 1; y < mag.rows - 1; y++) {
         for (int x = 1; x < mag.cols - 1; x++) {
 
-            std::pair<int, int> curr_px{y, x};
+            const Px curr_px{y, x};
 
             if (visited.contains(curr_px))
                 continue;
