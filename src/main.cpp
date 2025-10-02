@@ -13,17 +13,17 @@
 
 int main(int argc, char *argv[]) {
     // --- Config ---
-    auto args_expected = parse_args(argc, argv);
+    const auto args_expected = parse_args(argc, argv);
     if (!args_expected.has_value()) {
         std::println(stderr, "Failed to parse args: {}", args_expected.error());
         return EXIT_FAILURE;
     }
-    ArgConfig args{args_expected.value()};
+    const ArgConfig args{args_expected.value()};
 
     const std::string img_name{std::filesystem::path{args.img_path}.stem()};
 
     // --- Load Image ---
-    auto img_expected{load_image(args.img_path)};
+    const auto img_expected{load_image(args.img_path)};
     if (!img_expected.has_value()) {
         std::println(stderr, "Failed to load image: {}", img_expected.error());
         return EXIT_FAILURE;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat filt{gaussian_filt_expected.value()};
 
-    auto part_der_result_expected{compute_gaussian_derivatives(filt, args.sigma)};
+    const auto part_der_result_expected{compute_gaussian_derivatives(filt, args.sigma)};
     if (!part_der_result_expected.has_value()) {
         std::println(stderr, "Failed to partial derivatives of Gaussian: {}", part_der_result_expected.error());
         return EXIT_FAILURE;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
      * w/ Gx & Gy can result in negative values.
      */
 
-    auto fx_expected{convolve_through_image(img_padded, gx)};
+    const auto fx_expected{convolve_through_image(img_padded, gx)};
     if (!fx_expected.has_value()) {
         std::println(stderr, "Failed to compute image fx: {}", fx_expected.error());
         return EXIT_FAILURE;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     const cv::Mat fy{fy_expected.value()};
 
     // --- Gradient Direction ---
-    auto grad_dir_expected{compute_gradient_direction(fx, fy)};
+    const auto grad_dir_expected{compute_gradient_direction(fx, fy)};
     if (!grad_dir_expected.has_value()) {
         std::println(stderr, "Failed to generate gradient directions: ", grad_dir_expected.error());
         return EXIT_FAILURE;
@@ -82,35 +82,35 @@ int main(int argc, char *argv[]) {
      */
 
     // --- Gradient Magnitude + Save ---
-    auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
+    const auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
     if (!grad_mag_expected.has_value()) {
         std::println(stderr, "Failed to generate gradient magections: ", grad_mag_expected.error());
         return EXIT_FAILURE;
     }
     const cv::Mat grad_mag{grad_mag_expected.value()};
 
-    auto mag_save_res_expected{save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma)};
-    if (!mag_save_res_expected.has_value()) {
-        std::println(stderr, "Failed to save image grad_mag: {}", mag_save_res_expected.error());
+    const auto mag_save_expected{save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma)};
+    if (!mag_save_expected.has_value()) {
+        std::println(stderr, "Failed to save image grad_mag: {}", mag_save_expected.error());
         return EXIT_FAILURE;
     }
 
     // --- Non-Maximum Suppresion + Save ---
-    auto nms_mag_expected{non_maximum_suppression(grad_mag, grad_dir)};
+    const auto nms_mag_expected{non_maximum_suppression(grad_mag, grad_dir)};
     if (!nms_mag_expected.has_value()) {
         std::println(stderr, "Failed to generate nms mat: ", nms_mag_expected.error());
         return EXIT_FAILURE;
     }
     const cv::Mat nms_mag{nms_mag_expected.value()};
 
-    auto nms_save_res_expected{save_image(nms_mag, args.out_dir, img_name, "nms", args.sigma)};
-    if (!nms_save_res_expected.has_value()) {
-        std::println(stderr, "Failed to save image nms: {}", nms_save_res_expected.error());
+    const auto nms_save_expected{save_image(nms_mag, args.out_dir, img_name, "nms", args.sigma)};
+    if (!nms_save_expected.has_value()) {
+        std::println(stderr, "Failed to save image nms: {}", nms_save_expected.error());
         return EXIT_FAILURE;
     }
 
     // --- Hysteresis Thresholding + Save ---
-    auto thresholded_mag_expected{apply_hysteresis(nms_mag, args.low_threshold, args.high_threshold)};
+    const auto thresholded_mag_expected{apply_hysteresis(nms_mag, args.low_threshold, args.high_threshold)};
     if (!thresholded_mag_expected.has_value()) {
         std::println(stderr, "Failed to apply hysteresis thresholding: ", thresholded_mag_expected.error());
         return EXIT_FAILURE;
@@ -118,9 +118,9 @@ int main(int argc, char *argv[]) {
     const cv::Mat thresholded_mag{thresholded_mag_expected.value()};
 
     const auto hysteresis_phase_name{std::format("hysteresis_{}_{}", args.low_threshold, args.high_threshold)};
-    auto thresh_mag_save_res_expected{save_image(nms_mag, args.out_dir, img_name, hysteresis_phase_name, args.sigma)};
-    if (!thresh_mag_save_res_expected.has_value()) {
-        std::println(stderr, "Failed to save edge detection image: {}", thresh_mag_save_res_expected.error());
+    const auto thresh_mag_save_expected{save_image(nms_mag, args.out_dir, img_name, hysteresis_phase_name, args.sigma)};
+    if (!thresh_mag_save_expected.has_value()) {
+        std::println(stderr, "Failed to save edge detection image: {}", thresh_mag_save_expected.error());
         return EXIT_FAILURE;
     }
 
