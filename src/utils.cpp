@@ -10,7 +10,7 @@ cv::Mat pad_image(const cv::Mat &img, const int padding) {
     for (int y = 0; y < img.rows; y++) {
         const auto *original_row{img.ptr<std::uint8_t>(y)};
         auto *padded_row{padded.ptr<std::uint8_t>(y + padding)};
-        std::memcpy(padded_row + padding, original_row, img.cols);
+        std::memcpy(padded_row + padding, original_row, img.cols * img.elemSize());
     }
 
     return padded;
