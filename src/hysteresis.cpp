@@ -7,8 +7,8 @@
 #include <unordered_set>
 
 std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const int low_thresh, const int high_thresh) {
-    if (low_thresh < 0 || high_thresh < 0)
-        return std::unexpected(std::format("Negative threshold is invalid: {} or {}", low_thresh, high_thresh));
+    if (low_thresh < 0 || high_thresh < 0 || low_thresh > 255 || high_thresh > 255)
+        return std::unexpected(std::format("Threshold not in (0,255]: {} or {}", low_thresh, high_thresh));
 
     if (high_thresh <= low_thresh)
         return std::unexpected(std::format("tH must exceed lT: {} and {}", high_thresh, low_thresh));
@@ -24,6 +24,8 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
     auto mag_at_px = [padded_mag](std::pair<int, int> p) -> std::uint8_t {
         return padded_mag.at<std::uint8_t>(p.first, p.second);
     };
+
+    // TODO: optimise performance
 
     for (int y = 1; y < mag.rows - 1; y++) {
         for (int x = 1; x < mag.cols - 1; x++) {

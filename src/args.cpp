@@ -50,13 +50,13 @@ std::expected<ArgConfig, std::string> parse_args(int argc, char *argv[]) {
     if (prog.is_used("-lt")) {
         int i{prog.get<int>("-lt")};
         if (i <= 0 || i > 255)
-            return std::unexpected(std::format("low threshold must be in [0,255]: {}", i));
+            return std::unexpected(std::format("low threshold must be in (0,255]: {}", i));
     }
 
     if (prog.is_used("-ht")) {
         int i{prog.get<int>("-ht")};
         if (i <= 0 || i > 255)
-            return std::unexpected(std::format("high threshold must be in [0,255]: {}", i));
+            return std::unexpected(std::format("high threshold must be in (0,255]: {}", i));
     }
 
     if (prog.is_used("-lt") && prog.is_used("-ht")) {
