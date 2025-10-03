@@ -22,10 +22,4 @@ std::uint8_t operator+(const GradientDir gd);
 
 using Px = std::pair<int, int>;
 
-struct HashPx {
-    size_t operator()(const std::pair<int, int> &p) const {
-        return std::rotl(std::hash<int>{}(p.first), 1) ^ std::hash<int>{}(p.second);
-    }
-};
-
 #endif // UTILS_H

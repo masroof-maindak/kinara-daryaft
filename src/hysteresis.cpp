@@ -2,9 +2,12 @@
 #include <knr/utils.h>
 
 #include <array>
+#include <chrono>
 #include <format>
+#include <print>
 #include <queue>
-#include <unordered_set>
+
+using hrs = std::chrono::high_resolution_clock;
 
 std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const int low_thresh, const int high_thresh) {
     if (low_thresh < 0 || high_thresh < 0 || low_thresh > 255 || high_thresh > 255)
@@ -18,8 +21,7 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
 
     cv::Mat padded_mag{pad_image(mag, 1)};
     cv::Mat thresh_mag{mag.size(), CV_8UC1, cv::Scalar::all(0)};
-
-    std::unordered_set<Px, HashPx> visited{};
+    auto visited{std::vector<std::vector<bool>>(padded_mag.rows, std::vector<bool>(padded_mag.cols, false))};
 
     auto mag_at_px = [padded_mag](std::pair<int, int> p) -> std::uint8_t {
         return padded_mag.at<std::uint8_t>(p.first, p.second);
@@ -34,19 +36,40 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
      * - Non-cache-friendly memory accesses? Maybe store high-threshold pixels during a first pass and iterate through
      * rows on subsequent passes whilst maintaining a map of coordinates to know when you're 'above' or 'below' a
      * high-threshold pixel.
+     *
+     * ---
+     *
+     * NOTE - Observations:
+     *
+     * - The for loop for the neighbours takes 98% of the time of its parent while.
+     *   - But only 10% of the time of the whole 2d loop
+     * - the first visited.contains() call eats up 86% of the time of the whole matrix' loop, so let's get rid of that
+     * first
+     * - After replacing the unordered set w/ a boolean matrix, I'm still seeing 46% of the 2d loop's time spent on the
+     * first visisted check, surprisingly, and I doubt a bitfield would fare any better.
      */
 
+    hrs::duration while_time{};
+    hrs::duration vis_time{};
+    hrs::duration neighbours_time{};
+
+    auto s_total = hrs::now();
     for (int y = 1; y < mag.rows - 1; y++) {
         for (int x = 1; x < mag.cols - 1; x++) {
 
             const Px curr_px{y, x};
 
-            if (visited.contains(curr_px))
+            auto s_vis_cont = hrs::now();
+            if (visited[curr_px.first][curr_px.second])
                 continue;
+            auto e_vis_cont = hrs::now();
+            vis_time += (e_vis_cont - s_vis_cont);
 
             if (mag_at_px(curr_px) > high_thresh) {
                 std::queue<Px> to_visit({curr_px});
-                visited.insert(curr_px);
+                visited[curr_px.first][curr_px.second] = true;
+
+                auto s_while = hrs::now();
 
                 while (!to_visit.empty()) {
                     const auto px = to_visit.front();
@@ -68,15 +91,30 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
                                                   {px.first + 1, px.second},
                                                   {px.first + 1, px.second + 1}}};
 
+                    auto s_neighbours = hrs::now();
+
                     for (const auto n : neighbours) {
-                        if (!visited.contains(n))
+                        if (!visited[n.first][n.second]) {
                             to_visit.push(n);
-                        visited.insert(n);
+                            visited[n.first][n.second] = true;
+                        }
                     }
+
+                    auto e_neighbours = hrs::now();
+                    neighbours_time += (e_neighbours - s_neighbours);
                 }
+
+                auto e_while = hrs::now();
+                while_time += (e_while - s_while);
             }
         }
     }
+    auto e_total = hrs::now();
+
+    std::println("Total: {}", (e_total - s_total));
+    std::println("Is visited?: {}", vis_time);
+    std::println("While: {}", while_time);
+    std::println("Neighbours: {}", neighbours_time);
 
     return thresh_mag;
 }
