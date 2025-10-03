@@ -7,7 +7,9 @@
 #include <print>
 #include <queue>
 
-using hrs = std::chrono::high_resolution_clock;
+using hrs      = std::chrono::high_resolution_clock;
+using Duration = hrs::duration;
+using Nanos    = std::chrono::nanoseconds;
 
 std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const int low_thresh, const int high_thresh) {
     if (low_thresh < 0 || high_thresh < 0 || low_thresh > 255 || high_thresh > 255)
@@ -49,38 +51,46 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
      * first visisted check, surprisingly, and I doubt a bitfield would fare any better.
      */
 
-    hrs::duration while_time{};
-    hrs::duration vis_time{};
-    hrs::duration neighbours_time{};
+    Duration while_time{};
+    Duration mat_rw_time{};
+    Duration vis_time{};
+    Duration neighbours_time{};
 
-    auto s_total = hrs::now();
+    auto start_total = hrs::now();
+
     for (int y = 1; y < mag.rows - 1; y++) {
         for (int x = 1; x < mag.cols - 1; x++) {
 
             const Px curr_px{y, x};
 
-            auto s_vis_cont = hrs::now();
+            auto start_visited_check = hrs::now();
             if (visited[curr_px.first][curr_px.second])
                 continue;
-            auto e_vis_cont = hrs::now();
-            vis_time += (e_vis_cont - s_vis_cont);
+            auto end_visited_check = hrs::now();
+            vis_time += (end_visited_check - start_visited_check);
 
             if (mag_at_px(curr_px) > high_thresh) {
                 std::queue<Px> to_visit({curr_px});
                 visited[curr_px.first][curr_px.second] = true;
 
-                auto s_while = hrs::now();
-
+                auto start_while = hrs::now();
                 while (!to_visit.empty()) {
+
+                    auto start_mat_rw = hrs::now();
+
                     const auto px = to_visit.front();
                     to_visit.pop();
-
                     const auto curr_mag = mag_at_px(px);
 
                     if (curr_mag < low_thresh)
                         continue;
 
                     thresh_mag.at<std::uint8_t>(px.first - 1, px.second - 1) = curr_mag;
+
+                    auto end_mat_rw = hrs::now();
+                    mat_rw_time += (end_mat_rw - start_mat_rw);
+
+                    auto start_neighbours = hrs::now();
 
                     std::array<Px, 8> neighbours{{{px.first - 1, px.second - 1},
                                                   {px.first - 1, px.second},
@@ -91,8 +101,6 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
                                                   {px.first + 1, px.second},
                                                   {px.first + 1, px.second + 1}}};
 
-                    auto s_neighbours = hrs::now();
-
                     for (const auto n : neighbours) {
                         if (!visited[n.first][n.second]) {
                             to_visit.push(n);
@@ -100,21 +108,27 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
                         }
                     }
 
-                    auto e_neighbours = hrs::now();
-                    neighbours_time += (e_neighbours - s_neighbours);
+                    auto end_neighbours = hrs::now();
+                    neighbours_time += (end_neighbours - start_neighbours);
                 }
-
-                auto e_while = hrs::now();
-                while_time += (e_while - s_while);
+                auto end_while = hrs::now();
+                while_time += (end_while - start_while);
             }
         }
     }
-    auto e_total = hrs::now();
+    auto end_total  = hrs::now();
+    auto total_time = end_total - start_total;
 
-    std::println("Total: {}", (e_total - s_total));
-    std::println("Is visited?: {}", vis_time);
-    std::println("While: {}", while_time);
-    std::println("Neighbours: {}", neighbours_time);
+    auto to_perc = [](const Duration &child, const Duration &parent) {
+        return static_cast<double>(std::chrono::duration_cast<Nanos>(child).count()) /
+               std::chrono::duration_cast<Nanos>(parent).count() * 100;
+    };
+
+    std::println("Total: {}", total_time, total_time);
+    std::println("\tVis check: {} ({:.2f}% of total)", vis_time, to_perc(vis_time, total_time));
+    std::println("\t\tWhile: {} ({:.2f}% of total)", while_time, to_perc(while_time, total_time));
+    std::println("\t\t\tMat ReadWr: {:>10} ({:.2f}% of while)", mat_rw_time, to_perc(mat_rw_time, while_time));
+    std::println("\t\t\tNeighbours: {:>10} ({:.2f}% of while)", neighbours_time, to_perc(neighbours_time, while_time));
 
     return thresh_mag;
 }
