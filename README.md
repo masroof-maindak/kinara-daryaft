@@ -10,7 +10,7 @@ cd kinara-daryaft
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release .. # Or 'Debug' if you want to hack away.
 cmake --build .
-./knr -i <input-image> -o <output-dir># args, if relevant
+./knr -i <input-image> -o <output-dir>
 ```
 
 ## Dependencies
