@@ -2,6 +2,9 @@
 
 Despicable implementation of a Canny Edge Detector in C++.
 
+![Kessoku Band](.github/assets/bocchi.png)
+![Kessoku Band Post Edge Detection](.github/assets/bocchi_hysteresis_25_50_1.jpg)
+
 ## Usage
 
 ```bash
