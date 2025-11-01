@@ -15,7 +15,7 @@ int compute_filter_size(float sigma, float T) {
 
 std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_size, const float sigma) {
     if (sigma < 0.5)
-        return std::unexpected(std::format("Small sigma, expected sigma > 0.5: {}", sigma));
+        return std::unexpected(std::format("Small sigma, expected sigma >= 0.5: {}", sigma));
 
     if (filter_size < 0 || filter_size % 2 == 0)
         return std::unexpected(std::format("Filter size should be +ve & odd: {}", filter_size));

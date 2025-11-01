@@ -40,10 +40,10 @@ std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const i
                     to_visit.pop();
                     const auto curr_mag = mag_at_px(px);
 
-                    if (curr_mag < low_thresh)
+                    if (curr_mag >= low_thresh)
+                        thresh_mag.at<std::uint8_t>(px.first - 1, px.second - 1) = curr_mag;
+                    else
                         continue;
-
-                    thresh_mag.at<std::uint8_t>(px.first - 1, px.second - 1) = curr_mag;
 
                     std::array<Px, 8> neighbours{{{px.first - 1, px.second - 1},
                                                   {px.first - 1, px.second},

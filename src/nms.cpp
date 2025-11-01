@@ -47,7 +47,7 @@ std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_
                 return std::unexpected("Gradient direction matrix had unexpected value: {}");
             }
 
-            auto mag_at_px = [padded_mag](std::pair<int, int> p) -> std::uint8_t {
+            auto mag_at_px = [padded_mag](Px p) -> std::uint8_t {
                 return padded_mag.at<std::uint8_t>(p.first, p.second);
             };
 
