@@ -21,9 +21,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(argparse)
 
 find_package(OpenCV REQUIRED)
-add_executable(
-    knr
-    "src/main.cpp"
+add_library(
+    KinaraDaryaft
     "src/args.cpp"
     "src/io.cpp"
     "src/gauss.cpp"
@@ -31,6 +30,15 @@ add_executable(
     "src/gradient.cpp"
     "src/nms.cpp"
     "src/hysteresis.cpp"
+    "src/canny.cpp"
 )
-target_include_directories(knr PRIVATE "include/" ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(knr PRIVATE argparse ${OpenCV_LIBS})
+
+target_include_directories(
+    KinaraDaryaft
+    PRIVATE "include/" ${OpenCV_INCLUDE_DIRS}
+)
+
+add_executable(knr "src/main.cpp" "src/args.cpp")
+target_link_libraries(KinaraDaryaft PUBLIC argparse ${OpenCV_LIBS})
+target_link_libraries(knr PRIVATE KinaraDaryaft)
+

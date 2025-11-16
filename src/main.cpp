@@ -1,9 +1,6 @@
 #include <knr/args.h>
-#include <knr/gauss.h>
-#include <knr/hysteresis.h>
+#include <knr/canny.h>
 #include <knr/io.h>
-#include <knr/nms.h>
-#include <knr/utils.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -30,82 +27,13 @@ int main(int argc, char *argv[]) {
     }
     const cv::Mat img{img_expected.value()};
 
-    // --- G + Gx/Gy ---
-    const int filt_size{compute_filter_size(args.sigma, args.T)};
-    const auto gaussian_filt_expected{generate_gaussian_filter(filt_size, args.sigma)};
-    if (!gaussian_filt_expected.has_value()) {
-        std::println(stderr, "Failed to generate gaussian filter: {}", gaussian_filt_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat filt{gaussian_filt_expected.value()};
-
-    const auto part_der_result_expected{compute_gaussian_derivatives(filt, args.sigma)};
-    if (!part_der_result_expected.has_value()) {
-        std::println(stderr, "Failed to partial derivatives of Gaussian: {}", part_der_result_expected.error());
-        return EXIT_FAILURE;
-    }
-    const auto [gx, gy]{part_der_result_expected.value()};
-
-    // --- Fx/Fy ---
-    const cv::Mat img_padded{pad_image(img, gx.rows / 2)};
-
-    const auto fx_expected{convolve_through_image(img_padded, gx)};
-    if (!fx_expected.has_value()) {
-        std::println(stderr, "Failed to compute image fx: {}", fx_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat fx{fx_expected.value()};
-
-    const auto fy_expected{convolve_through_image(img_padded, gy)};
-    if (!fy_expected.has_value()) {
-        std::println(stderr, "Failed to compute image fy: {}", fy_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat fy{fy_expected.value()};
-
-    // --- Gradient Direction ---
-    const auto grad_dir_expected{compute_gradient_direction(fx, fy)};
-    if (!grad_dir_expected.has_value()) {
-        std::println(stderr, "Failed to generate gradient directions: ", grad_dir_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat grad_dir{grad_dir_expected.value()};
-
-    // --- Gradient Magnitude + Save ---
-    const auto grad_mag_expected{compute_gradient_magnitude(fx, fy)};
-    if (!grad_mag_expected.has_value()) {
-        std::println(stderr, "Failed to generate gradient magections: ", grad_mag_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat grad_mag{grad_mag_expected.value()};
-
-    const auto mag_save_expected{save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma)};
-    if (!mag_save_expected.has_value()) {
-        std::println(stderr, "Failed to save image grad_mag: {}", mag_save_expected.error());
+    // --- Canny ---
+    const auto thresh_mag_expected{canny_edge_detector()};
+    if (!thresh_mag_expected.has_value) {
         return EXIT_FAILURE;
     }
 
-    // --- Non-Maximum Suppresion + Save ---
-    const auto nms_mag_expected{non_maximum_suppression(grad_mag, grad_dir)};
-    if (!nms_mag_expected.has_value()) {
-        std::println(stderr, "Failed to generate nms mat: ", nms_mag_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat nms_mag{nms_mag_expected.value()};
-
-    const auto nms_save_expected{save_image(nms_mag, args.out_dir, img_name, "nms", args.sigma)};
-    if (!nms_save_expected.has_value()) {
-        std::println(stderr, "Failed to save image nms: {}", nms_save_expected.error());
-        return EXIT_FAILURE;
-    }
-
-    // --- Hysteresis Thresholding + Save ---
-    const auto thresholded_mag_expected{apply_hysteresis(nms_mag, args.low_threshold, args.high_threshold)};
-    if (!thresholded_mag_expected.has_value()) {
-        std::println(stderr, "Failed to apply hysteresis thresholding: ", thresholded_mag_expected.error());
-        return EXIT_FAILURE;
-    }
-    const cv::Mat thresh_mag{thresholded_mag_expected.value()};
+    const cv::Mat thresh_mag{thresh_mag_expected.value()};
 
     const auto hyst_phase_name{std::format("hysteresis_{}_{}", args.low_threshold, args.high_threshold)};
     const auto thresh_mag_save_expected{save_image(thresh_mag, args.out_dir, img_name, hyst_phase_name, args.sigma)};
