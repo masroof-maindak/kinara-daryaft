@@ -1,4 +1,4 @@
-#include <knr/args.h>
+#include "args.h"
 
 std::expected<ArgConfig, std::string> parse_args(int argc, char *argv[]) {
     argparse::ArgumentParser prog("knr", "v2025-09-17a", argparse::default_arguments::help);
@@ -24,13 +24,13 @@ std::expected<ArgConfig, std::string> parse_args(int argc, char *argv[]) {
 
     prog.add_argument("-lt", "--low-threshold")
         .help("specify the low threshold to be used hysteresis thresholding")
-        .default_value(2)
+        .default_value(60)
         .scan<'i', int>()
         .store_into(args.low_threshold);
 
     prog.add_argument("-ht", "--high-threshold")
         .help("specify the high threshold to be used hysteresis thresholding")
-        .default_value(6)
+        .default_value(90)
         .scan<'i', int>()
         .store_into(args.high_threshold);
 

@@ -23,7 +23,6 @@ FetchContent_MakeAvailable(argparse)
 find_package(OpenCV REQUIRED)
 add_library(
     KinaraDaryaft
-    "src/args.cpp"
     "src/io.cpp"
     "src/gauss.cpp"
     "src/utils.cpp"
@@ -35,10 +34,9 @@ add_library(
 
 target_include_directories(
     KinaraDaryaft
-    PRIVATE "include/" ${OpenCV_INCLUDE_DIRS}
+    PUBLIC "include/" ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(knr "src/main.cpp" "src/args.cpp")
-target_link_libraries(KinaraDaryaft PUBLIC argparse ${OpenCV_LIBS})
-target_link_libraries(knr PRIVATE KinaraDaryaft)
-
+add_executable(knr "src/main.cpp" "src/args.cpp" ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(KinaraDaryaft PUBLIC ${OpenCV_LIBS})
+target_link_libraries(knr PRIVATE KinaraDaryaft argparse ${OpenCV_LIBS})

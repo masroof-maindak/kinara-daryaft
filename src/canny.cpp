@@ -1,26 +1,22 @@
-#include <knr/args.h>
+#include <knr/canny.h>
 #include <knr/gauss.h>
 #include <knr/hysteresis.h>
 #include <knr/io.h>
 #include <knr/nms.h>
 #include <knr/utils.h>
 
-#include <opencv2/opencv.hpp>
-
-#include <expected>
-
 std::expected<cv::Mat, std::string> canny_edge_detector(const std::string &img_name, const cv::Mat &img,
-                                                        const ArgConfig &args, bool save_intermediates = false) {
+                                                        const CannyCfg &cfg, bool save_intermediates) {
     // --- G + Gx/Gy ---
-    const int filt_size{compute_filter_size(args.sigma, args.T)};
+    const int filt_size{compute_filter_size(cfg.sigma, cfg.T)};
 
-    const auto gaussian_filt_expected{generate_gaussian_filter(filt_size, args.sigma)};
+    const auto gaussian_filt_expected{generate_gaussian_filter(filt_size, cfg.sigma)};
     if (!gaussian_filt_expected.has_value())
         return std::unexpected{"Failed to generate gaussian filter: {}" + gaussian_filt_expected.error()};
 
     const cv::Mat filt{gaussian_filt_expected.value()};
 
-    const auto part_der_result_expected{compute_gaussian_derivatives(filt, args.sigma)};
+    const auto part_der_result_expected{compute_gaussian_derivatives(filt, cfg.sigma)};
     if (!part_der_result_expected.has_value())
         return std::unexpected{"Failed to partial derivatives of Gaussian: {}" + part_der_result_expected.error()};
 
@@ -57,7 +53,7 @@ std::expected<cv::Mat, std::string> canny_edge_detector(const std::string &img_n
     const cv::Mat grad_mag{grad_mag_expected.value()};
 
     if (save_intermediates) {
-        const auto mag_sv_expected{save_image(grad_mag, args.out_dir, img_name, "magnitude", args.sigma)};
+        const auto mag_sv_expected{save_image(grad_mag, cfg.out_dir, img_name, "magnitude", cfg.sigma)};
         if (!mag_sv_expected.has_value())
             return std::unexpected{"Failed to save image grad_mag: {}" + mag_sv_expected.error()};
     }
@@ -70,13 +66,13 @@ std::expected<cv::Mat, std::string> canny_edge_detector(const std::string &img_n
     const cv::Mat nms_mag{nms_mag_expected.value()};
 
     if (save_intermediates) {
-        const auto nms_sv_expected{save_image(nms_mag, args.out_dir, img_name, "nms", args.sigma)};
+        const auto nms_sv_expected{save_image(nms_mag, cfg.out_dir, img_name, "nms", cfg.sigma)};
         if (!nms_sv_expected.has_value())
             return std::unexpected{"Failed to save image nms: {}" + nms_sv_expected.error()};
     }
 
     // --- Hysteresis Thresholding + Save ---
-    const auto thresholded_mag_expected{apply_hysteresis(nms_mag, args.low_threshold, args.high_threshold)};
+    const auto thresholded_mag_expected{apply_hysteresis(nms_mag, cfg.low_threshold, cfg.high_threshold)};
     if (!thresholded_mag_expected.has_value())
         return std::unexpected{"Failed to apply hysteresis thresholding: " + thresholded_mag_expected.error()};
 
