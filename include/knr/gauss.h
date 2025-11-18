@@ -10,7 +10,6 @@
 int compute_filter_size(float sigma, float T);
 
 // Generates a normalized gaussian filter of floats
-// Also returns the scale factor so the user can 'scale down' later i.e during magnitude calculation.
 // G (x, y) = exp (-(x^2 + y^2)/(2*sigma^2))
 std::expected<cv::Mat, std::string> generate_gaussian_filter(const int filter_size, const float sigma);
 
