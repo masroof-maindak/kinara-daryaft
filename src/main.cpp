@@ -28,9 +28,8 @@ int main(int argc, char *argv[]) {
     const cv::Mat img{img_expected.value()};
 
     // --- Canny ---
-    const auto thresh_mag_expected{canny_edge_detector(
-        img_name, img, {args.sigma, args.T, args.low_threshold, args.high_threshold, args.img_path, args.out_dir},
-        true)};
+    const auto thresh_mag_expected{canny_edge_detector
+        img_name, img, {args.sigma, args.T, args.low_threshold, args.high_threshold, args.out_dir}, true)};
     if (!thresh_mag_expected.has_value()) {
         std::println(stderr, "Failed to run canny: {}", thresh_mag_expected.error());
         return EXIT_FAILURE;

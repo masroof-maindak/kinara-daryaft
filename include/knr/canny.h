@@ -10,7 +10,6 @@ struct CannyCfg {
     float T;
     int low_threshold;
     int high_threshold;
-    std::string img_path;
     std::string out_dir;
 };
 
