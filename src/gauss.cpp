@@ -8,6 +8,8 @@
 #include <numeric>
 #include <span>
 
+namespace kd {
+
 int compute_filter_size(float sigma, float T) {
     const int half_size{static_cast<int>(std::round(sqrt(-std::logf(T)) * 2 * sigma * sigma))};
     return 2 * half_size + 1;
@@ -145,3 +147,4 @@ std::expected<cv::Mat, std::string> convolve_through_image(const cv::Mat &img_pa
 
     return f_part;
 }
+} // namespace kd

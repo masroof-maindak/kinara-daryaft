@@ -5,7 +5,8 @@
 #include <format>
 #include <queue>
 
-std::expected<cv::Mat, std::string> apply_hysteresis(const cv::Mat &mag, const int low_thresh, const int high_thresh) {
+std::expected<cv::Mat, std::string> kd::apply_hysteresis(const cv::Mat &mag, const int low_thresh,
+                                                         const int high_thresh) {
     if (low_thresh < 0 || high_thresh < 0 || low_thresh > 255 || high_thresh > 255)
         return std::unexpected(std::format("Threshold not in (0,255]: {} or {}", low_thresh, high_thresh));
 

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+namespace kd {
 cv::Mat pad_image(const cv::Mat &img, const int padding);
 
 /*
@@ -21,5 +22,7 @@ enum class GradientDir : std::uint8_t {
 std::uint8_t operator+(const GradientDir gd);
 
 using Px = std::pair<int, int>;
+
+} // namespace kd
 
 #endif // UTILS_H

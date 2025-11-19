@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-std::expected<cv::Mat, std::string> non_maximum_suppression(const cv::Mat &grad_mag, const cv::Mat &grad_dir) {
+std::expected<cv::Mat, std::string> kd::non_maximum_suppression(const cv::Mat &grad_mag, const cv::Mat &grad_dir) {
     using enum GradientDir;
 
     if (grad_mag.type() != CV_8UC1)

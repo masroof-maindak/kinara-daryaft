@@ -5,6 +5,8 @@
 
 #include <expected>
 
+namespace kd {
+
 struct CannyCfg {
     float sigma;
     float T;
@@ -14,6 +16,7 @@ struct CannyCfg {
 };
 
 std::expected<cv::Mat, std::string> canny_edge_detector(const std::string &img_name, const cv::Mat &img,
-                                                        const CannyCfg &args, bool save_intermediates = false);
+                                                        const CannyCfg &args, bool save_intermediates);
+} // namespace kd
 
 #endif // CANNY_H

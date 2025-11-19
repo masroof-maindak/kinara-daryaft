@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <format>
 
+namespace kd {
+
 std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx, const cv::Mat &fy) {
     if (fx.size() != fy.size())
         return std::unexpected(std::format("fx.size != fy.size ; {}x{} & {}x{}", fx.rows, fx.cols, fy.rows, fy.cols));
@@ -96,3 +98,4 @@ std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx
 
     return mag;
 }
+} // namespace kd

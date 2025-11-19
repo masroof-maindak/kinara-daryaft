@@ -7,6 +7,8 @@
 #include <string>
 #include <utility>
 
+namespace kd {
+
 int compute_filter_size(float sigma, float T);
 
 // Generates a normalized gaussian filter of floats
@@ -31,5 +33,7 @@ std::expected<cv::Mat, std::string> compute_gradient_direction(const cv::Mat &fx
 // Takes 2x 32SC1 (fx, fy)
 // returns 8UC1
 std::expected<cv::Mat, std::string> compute_gradient_magnitude(const cv::Mat &fx, const cv::Mat &fy);
+
+} // namespace kd
 
 #endif // GAUSS_H

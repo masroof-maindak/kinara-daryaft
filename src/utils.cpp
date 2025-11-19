@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+namespace kd {
+
 cv::Mat pad_image(const cv::Mat &img, const int padding) {
     cv::Mat padded{img.rows + 2 * padding, img.cols + 2 * padding, img.type(), cv::Scalar(0)};
 
@@ -17,3 +19,4 @@ cv::Mat pad_image(const cv::Mat &img, const int padding) {
 }
 
 std::uint8_t operator+(const GradientDir gd) { return std::to_underlying(gd); }
+} // namespace kd

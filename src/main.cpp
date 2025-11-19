@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
 
     const std::string img_name{std::filesystem::path{args.img_path}.stem()};
 
-    // --- Load Image ---
-    const auto img_expected{load_image(args.img_path)};
+    // --- Load image ---
+    const auto img_expected{kd::load_image(args.img_path)};
     if (!img_expected.has_value()) {
         std::println(stderr, "Failed to load image: {}", img_expected.error());
         return EXIT_FAILURE;
@@ -28,17 +28,18 @@ int main(int argc, char *argv[]) {
     const cv::Mat img{img_expected.value()};
 
     // --- Canny ---
-    const auto thresh_mag_expected{canny_edge_detector
+    const auto thresh_mag_expected{kd::canny_edge_detector(
         img_name, img, {args.sigma, args.T, args.low_threshold, args.high_threshold, args.out_dir}, true)};
     if (!thresh_mag_expected.has_value()) {
         std::println(stderr, "Failed to run canny: {}", thresh_mag_expected.error());
         return EXIT_FAILURE;
     }
-
     const cv::Mat thresh_mag{thresh_mag_expected.value()};
 
+    // --- Save image ---
     const auto hyst_phase_name{std::format("hysteresis_{}_{}", args.low_threshold, args.high_threshold)};
-    const auto thresh_mag_save_expected{save_image(thresh_mag, args.out_dir, img_name, hyst_phase_name, args.sigma)};
+    const auto thresh_mag_save_expected{
+        kd::save_image(thresh_mag, args.out_dir, img_name, hyst_phase_name, args.sigma)};
     if (!thresh_mag_save_expected.has_value()) {
         std::println(stderr, "Failed to save edge detection image: {}", thresh_mag_save_expected.error());
         return EXIT_FAILURE;

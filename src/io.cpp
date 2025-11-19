@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+namespace kd {
 std::expected<cv::Mat, std::string> load_image(const std::string &path) {
     cv::Mat img{cv::imread(path, cv::IMREAD_GRAYSCALE)};
 
@@ -25,3 +26,4 @@ std::expected<void, std::string> save_image(const cv::Mat &img, const std::strin
 
     return {};
 }
+} // namespace kd

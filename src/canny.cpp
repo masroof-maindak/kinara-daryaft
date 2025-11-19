@@ -5,8 +5,8 @@
 #include <knr/nms.h>
 #include <knr/utils.h>
 
-std::expected<cv::Mat, std::string> canny_edge_detector(const std::string &img_name, const cv::Mat &img,
-                                                        const CannyCfg &cfg, bool save_intermediates) {
+std::expected<cv::Mat, std::string> kd::canny_edge_detector(const std::string &img_name, const cv::Mat &img,
+                                                            const CannyCfg &cfg, bool save_intermediates) {
     // --- G + Gx/Gy ---
     const int filt_size{compute_filter_size(cfg.sigma, cfg.T)};
 
