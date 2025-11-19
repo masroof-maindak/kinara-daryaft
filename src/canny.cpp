@@ -12,13 +12,13 @@ std::expected<cv::Mat, std::string> kd::canny_edge_detector(const std::string &i
 
     const auto gaussian_filt_expected{generate_gaussian_filter(filt_size, cfg.sigma)};
     if (!gaussian_filt_expected.has_value())
-        return std::unexpected{"Failed to generate gaussian filter: {}" + gaussian_filt_expected.error()};
+        return std::unexpected{"Failed to generate gaussian filter: " + gaussian_filt_expected.error()};
 
     const cv::Mat filt{gaussian_filt_expected.value()};
 
     const auto part_der_result_expected{compute_gaussian_derivatives(filt, cfg.sigma)};
     if (!part_der_result_expected.has_value())
-        return std::unexpected{"Failed to partial derivatives of Gaussian: {}" + part_der_result_expected.error()};
+        return std::unexpected{"Failed to partial derivatives of Gaussian: " + part_der_result_expected.error()};
 
     const auto [gx, gy]{part_der_result_expected.value()};
 
@@ -27,14 +27,14 @@ std::expected<cv::Mat, std::string> kd::canny_edge_detector(const std::string &i
 
     const auto fx_expected{convolve_through_image(img_padded, gx)};
     if (!fx_expected.has_value())
-        return std::unexpected{"Failed to compute image fx: {}" + fx_expected.error()};
+        return std::unexpected{"Failed to compute image fx: " + fx_expected.error()};
 
     const cv::Mat fx{fx_expected.value()};
 
     const auto fy_expected{convolve_through_image(img_padded, gy)};
 
     if (!fy_expected.has_value())
-        return std::unexpected{"Failed to compute image fy: {}" + fy_expected.error()};
+        return std::unexpected{"Failed to compute image fy: " + fy_expected.error()};
 
     const cv::Mat fy{fy_expected.value()};
 
@@ -55,7 +55,7 @@ std::expected<cv::Mat, std::string> kd::canny_edge_detector(const std::string &i
     if (save_intermediates) {
         const auto mag_sv_expected{save_image(grad_mag, cfg.out_dir, img_name, "magnitude", cfg.sigma)};
         if (!mag_sv_expected.has_value())
-            return std::unexpected{"Failed to save image grad_mag: {}" + mag_sv_expected.error()};
+            return std::unexpected{"Failed to save image grad_mag: " + mag_sv_expected.error()};
     }
 
     // --- Non-Maximum Suppresion + Save ---
@@ -68,7 +68,7 @@ std::expected<cv::Mat, std::string> kd::canny_edge_detector(const std::string &i
     if (save_intermediates) {
         const auto nms_sv_expected{save_image(nms_mag, cfg.out_dir, img_name, "nms", cfg.sigma)};
         if (!nms_sv_expected.has_value())
-            return std::unexpected{"Failed to save image nms: {}" + nms_sv_expected.error()};
+            return std::unexpected{"Failed to save image nms: " + nms_sv_expected.error()};
     }
 
     // --- Hysteresis Thresholding + Save ---
