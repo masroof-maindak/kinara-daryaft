@@ -34,6 +34,17 @@ FetchContent_MakeAvailable(KinaraDaryaft)
 target_link_libraries(your_executable PRIVATE KinaraDaryaft)
 ```
 
+```cpp
+// main.cpp
+
+#include <knr/canny.h>
+
+/*
+ * std::expected<cv::Mat, std::string> canny_edge_detector(const std::string &img_name, const cv::Mat &img,
+ *                                                         const CannyCfg &args, bool save_intermediates);
+ */
+```
+
 ## Dependencies
 
 - OpenCV
